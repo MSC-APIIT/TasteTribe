@@ -108,6 +108,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 py-8">
           {/* Hero Section */}
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-12">
+            <div className="block lg:hidden h-14 sm:h-14 md:h-16"></div>
             <div className="lg:w-1/2 text-center lg:text-left">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
                 Welcome to TasteTribe!

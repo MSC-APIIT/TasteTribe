@@ -10,7 +10,7 @@ import Header from '@/components/home/Header';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Next-template-1',
+  title: 'TasteTribe',
   description: 'by Sahan Dilshan',
 };
 
@@ -21,6 +21,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/logo.png" type="image/png" />
+        {/* You can add more sizes or formats here */}
+      </head>
+
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"

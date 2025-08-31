@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-// import Logo from './Logo'; -- TODO
+import Logo from './Logo';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import { HeaderItem } from '@/app/types/menu';
 import SignUp from '../Auth/SignUp';
@@ -86,15 +86,11 @@ const Header = () => {
       }`}
     >
       <div>
-        <div className="container mx-auto flex justify-end items-center">
-          {/* <div>
+        <div className="container mx-auto flex justify-between items-center">
+          <div>
             <Logo />
-          </div> */}
-          {/* <nav className="hidden lg:flex grow items-center gap-4 xl:gap-6  justify-center">
-            {headerLink.map((item, index) => (
-              <HeaderLink key={index} item={item} />
-            ))}
-          </nav> */}
+          </div>
+
           <div className="flex items-center gap-2 lg:gap-3">
             <Link
               href="#"
@@ -187,10 +183,6 @@ const Header = () => {
           } z-50`}
         >
           <div className="flex items-center justify-between gap-2 p-4">
-            {/* <div>
-              <Logo />
-            </div> */}
-            {/*  */}
             <button
               onClick={() => setNavbarOpen(false)}
               className="hover:cursor-pointer"
@@ -242,6 +234,7 @@ const Header = () => {
         </div>
       </div>
     </header>
+    
   );
 };
 

@@ -1,0 +1,20 @@
+import { NextResponse } from 'next/server';
+import { connectDb } from '@/server/lib/db';
+import mongoose from 'mongoose';
+
+export async function GET() {
+  try {
+    const conn = await connectDb();
+    // conn.connection.readyState:
+    // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+    return NextResponse.json({
+      status: 'ok',
+      readyState: conn.connection.readyState,
+    });
+  } catch (err: any) {
+    return NextResponse.json(
+      { status: 'error', message: err.message },
+      { status: 500 }
+    );
+  }
+}

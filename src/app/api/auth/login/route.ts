@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loginUser } from '@/server/modules/auth/service';
+import { UserDto } from '@/server/modules/auth/types';
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,7 +10,7 @@ export async function POST(req: NextRequest) {
       password
     );
 
-    const res = NextResponse.json({ user, accessToken });
+    const res = NextResponse.json({ user: user as UserDto, accessToken });
     res.cookies.set('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

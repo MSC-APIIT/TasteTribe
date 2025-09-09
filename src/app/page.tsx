@@ -104,19 +104,18 @@ export default function Home() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-background text-foreground">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 py-8">
           {/* Hero Section */}
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-12">
-            <div className="block lg:hidden h-14 sm:h-14 md:h-16"></div>
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mt-20 mb-12">
             <div className="lg:w-1/2 text-center lg:text-left">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              <h1 className="text-4xl font-bold text-foreground mb-4">
                 Welcome to TasteTribe!
               </h1>
-              <p className="text-lg text-gray-700 mb-6">
-                Discover, rate, and comment on the best food in the city. Join
-                our community of food lovers and explore a world of flavors!
+              <p className="text-lg text-muted-foreground mb-6">
+                Discover, rate, and comment on the best food in the city...
               </p>
+
               {/* Add animation/vector here */}
               <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
                 <FoodHeroAnimation />{' '}
@@ -132,7 +131,7 @@ export default function Home() {
             <input
               type="text"
               placeholder="Search for stalls or dishes..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-3 border border-border rounded-lg bg-card text-card-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -144,7 +143,7 @@ export default function Home() {
             {menuItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 lg:grid-cols-2 gap-6"
+                className="bg-secondary text-card-foreground rounded-lg shadow-md p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 border border-border"
               >
                 {/* Image Slider (Left Side) */}
                 <div className="relative">
@@ -166,10 +165,10 @@ export default function Home() {
                 {/* Menu Item Details and Rating (Right Side) */}
                 <div>
                   <div className="flex justify-between items-start mb-2">
-                    <h2 className="text-2xl font-semibold text-gray-800">
+                    <h2 className="text-2xl font-semibold text-secondary-foreground">
                       {item.name}
                     </h2>
-                    <div className="flex items-center text-sm text-gray-600">
+                    <div className="flex items-center text-sm text-muted-foreground">
                       <span className="mr-1">{item.stallName}</span>
                       <FaStar className="text-yellow-400 mr-0.5" />
                       <span>{item.stallOverallRating.toFixed(1)}</span>
@@ -188,11 +187,13 @@ export default function Home() {
                         />
                       ))}
                     </div>
-                    <span className="text-lg font-medium text-gray-700">
+                    <span className="text-lg font-medium text-muted-foreground">
                       {item.averageRating.toFixed(1)}
                     </span>
                   </div>
-                  <p className="text-gray-700 mb-4">{item.description}</p>
+                  <p className="text-muted-foreground mb-4">
+                    {item.description}
+                  </p>
                   <p className="text-xl font-bold text-green-600 mb-6">
                     {item.price}
                   </p>
@@ -222,12 +223,13 @@ export default function Home() {
                       {item.comments.map((comment) => (
                         <div
                           key={comment.id}
-                          className="bg-gray-50 p-3 rounded-md"
+                          className="bg-card text-card-foreground rounded-lg shadow-md p-4 border border-border"
                         >
-                          <p className="font-semibold text-gray-800">
-                            {comment.user}
+                          <p className="font-semibold">{comment.user}</p>
+                          <p className="text-muted-foreground">
+                            {comment.text}
                           </p>
-                          <p className="text-gray-700">{comment.text}</p>
+
                           {comment.replies.length > 0 && (
                             <div className="ml-4 mt-2 space-y-2">
                               {comment.replies.map((reply) => (
@@ -250,10 +252,11 @@ export default function Home() {
                     {/* Add New Comment Input */}
                     <div className="mt-4">
                       <textarea
-                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
                         rows={2}
                         placeholder="Add your comment..."
                       ></textarea>
+
                       <button className="mt-2 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors duration-200">
                         Post Comment
                       </button>

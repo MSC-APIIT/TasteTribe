@@ -66,7 +66,7 @@ const FoodShowcase = () => {
 
   return (
     <div
-      className="lg:w-full relative mt-24"
+      className="relative w-full h-96 rounded-lg overflow-hidden shadow-2xl"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -186,7 +186,7 @@ const FoodShowcase = () => {
       </div>
 
       {/* Food grid preview below */}
-      <div className="mt-4 grid grid-cols-6 gap-2">
+      <div className="mt-4 grid grid-cols-6 gap-2 justify-center">
         {foodSpread.map((food, i) => (
           <button
             key={i}

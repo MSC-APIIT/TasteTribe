@@ -6,6 +6,8 @@ import React from 'react';
 import ThemeSwitch from '@/components/home/themeSwitch';
 import LeftDrawer from '@/components/home/LeftDrawer';
 import Header from '@/components/home/Header';
+import { Toaster } from 'react-hot-toast';
+import SessionModal from '../components/Auth/SessionTimeout/SessionModal';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,18 +29,21 @@ export default function RootLayout({
       </head>
 
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ThemeSwitch className="fixed top-4 right-4 z-50" />
-          <LeftDrawer className="fixed top-4 left-4 z-50" />
-          <Header />
-
-          {children}
-        </ThemeProvider>
+        <div className="bg-background text-foreground min-h-screen">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Toaster position="top-right" />
+            <ThemeSwitch className="fixed top-4 right-4 z-50" />
+            <LeftDrawer className="fixed top-4 left-4 z-50" />
+            <Header />
+            <SessionModal />
+            {children}
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   );

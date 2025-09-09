@@ -4,7 +4,7 @@ const SocialSignIn = () => {
   return (
     <>
       <div className="flex gap-4">
-        <button className="flex w-full items-center justify-center gap-2.5 rounded-lg p-3.5 border border-gray-200 text-black hover:bg-neutral-100 hover:cursor-pointer">
+        <button className="flex w-full items-center justify-center gap-2.5 rounded-lg p-3.5 border border-input text-card-foreground bg-card hover:bg-muted transition">
           Sign In
           <svg
             width="23"
@@ -44,7 +44,7 @@ const SocialSignIn = () => {
           </svg>
         </button>
 
-        <button className="flex w-full items-center justify-center gap-2.5 rounded-lg p-3.5 border border-gray-200 text-black hover:bg-neutral-100 hover:cursor-pointer">
+        <button className="flex w-full items-center justify-center gap-2.5 rounded-lg p-3.5 border border-input text-card-foreground bg-card hover:bg-muted transition">
           Sign In
           <svg
             width="22"

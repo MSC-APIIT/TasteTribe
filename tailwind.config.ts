@@ -52,6 +52,7 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        surface: 'hsl(var(--surface))',
       },
       backgroundColor: {
         container: "hsl(var(--container))",

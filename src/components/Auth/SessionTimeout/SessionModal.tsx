@@ -1,12 +1,13 @@
 'use client';
 
 import { useSessionTimeout } from '../../../hooks/userSessionTimeout';
-import { useAuth } from '../../../hooks/userAuth';
+// import { useAuth } from '../../../hooks/userAuth';
 import toast from 'react-hot-toast';
 
 export default function SessionModal() {
-  const { showModal, setShowModal, resetSessionTimers, forceLogout } = useSessionTimeout();
-  const { logout } = useAuth();
+  const { showModal, setShowModal, resetSessionTimers, forceLogout } =
+    useSessionTimeout();
+  // const { logout } = useAuth();
 
   const handleExtend = async () => {
     try {

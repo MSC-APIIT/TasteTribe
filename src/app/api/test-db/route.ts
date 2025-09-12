@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { connectDb } from '@/server/lib/db';
-import mongoose from 'mongoose';
 
 export async function GET() {
   try {

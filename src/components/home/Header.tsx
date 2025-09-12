@@ -4,14 +4,11 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import Logo from './Logo';
 import { Icon } from '@iconify/react/dist/iconify.js';
-import { HeaderItem } from '@/app/types/menu';
 import SignUp from '../Auth/SignUp';
 import Signin from '../Auth/SignIn';
 import { useAuth } from '@/hooks/userAuth';
 
 const Header = () => {
-  const [headerLink, setHeaderLink] = useState<HeaderItem[]>([]);
-
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [sticky, setSticky] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
@@ -19,7 +16,6 @@ const Header = () => {
 
   const { user, logout } = useAuth();
 
-  const navbarRef = useRef<HTMLDivElement>(null);
   const signInRef = useRef<HTMLDivElement>(null);
   const signUpRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);

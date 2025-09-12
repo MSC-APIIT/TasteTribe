@@ -4,6 +4,7 @@ const MONGO_URI = process.env.MONGO_URI!;
 if (!MONGO_URI) throw new Error('MONGO_URI not set');
 
 declare global {
+  // eslint-disable-next-line no-unused-vars
   var _mongoose: { conn?: typeof mongoose; promise?: Promise<typeof mongoose> };
 }
 

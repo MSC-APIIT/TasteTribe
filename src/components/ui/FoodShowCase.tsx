@@ -4,6 +4,8 @@ const FoodShowcase = () => {
   const [activeFood, setActiveFood] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
+  const unusedVar = 123;
+
   const foodSpread = [
     {
       emoji: '🍔',

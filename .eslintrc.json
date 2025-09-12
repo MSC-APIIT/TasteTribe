@@ -11,10 +11,9 @@
     "react/jsx-uses-react": "off",
     "react/jsx-uses-vars": "warn",
     "react/jsx-filename-extension": [1, { "extensions": [".jsx", ".tsx"] }],
-    "no-unused-vars": "warn",
+    "no-unused-vars": "error",
     "semi": ["error", "always"],
     "quotes": ["error", "single"],
-    // "no-console": "error",
     "react/prop-types": "off",
     "no-undef": "off",
     "no-console": ["error", { "allow": ["warn", "error"] }]

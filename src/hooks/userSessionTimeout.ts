@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import toast from 'react-hot-toast';
 import { useAuth } from './userAuth';
@@ -14,17 +14,23 @@ export function useSessionTimeout() {
   const warnTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const logoutTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const clearTimers = () => {
+  const clearTimers = useCallback(() => {
     if (warnTimeoutRef.current) clearTimeout(warnTimeoutRef.current);
     if (logoutTimeoutRef.current) clearTimeout(logoutTimeoutRef.current);
     warnTimeoutRef.current = null;
     logoutTimeoutRef.current = null;
-  };
+  }, []);
 
-  const resetSessionTimers = () => {
+  const forceLogout = useCallback(() => {
+    clearTimers();
+    setShowModal(false);
+    logout();
+  }, [clearTimers, logout]);
+
+  const resetSessionTimers = useCallback(() => {
     clearTimers();
 
-    const token = localStorage.getItem('accessToken');
+    const token = sessionStorage.getItem('accessToken');
     if (!token) return;
 
     let decoded: DecodedToken;
@@ -55,18 +61,12 @@ export function useSessionTimeout() {
       forceLogout();
       toast.error('Session expired. You’ve been logged out.');
     }, timeUntilExpiry);
-  };
-
-  const forceLogout = () => {
-    clearTimers();
-    setShowModal(false);
-    logout();
-  };
+  }, [clearTimers, forceLogout, setShowModal]);
 
   useEffect(() => {
     resetSessionTimers();
     return clearTimers;
-  }, []);
+  }, [clearTimers, resetSessionTimers]);
 
   return { showModal, setShowModal, resetSessionTimers, forceLogout };
 }

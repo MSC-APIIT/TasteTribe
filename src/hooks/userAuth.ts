@@ -9,7 +9,7 @@ export function useAuth() {
 
   useEffect(() => {
     const loadUser = () => {
-      const storedUser = localStorage.getItem('user');
+      const storedUser = sessionStorage.getItem('user');
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       } else {
@@ -27,10 +27,10 @@ export function useAuth() {
   }, []);
 
   const logout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('sessionStartTime');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('sessionStartTime');
 
     setUser(null);
     window.dispatchEvent(new Event('auth-change')); // notify listeners

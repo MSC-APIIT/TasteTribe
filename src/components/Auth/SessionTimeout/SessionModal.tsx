@@ -15,7 +15,7 @@ export default function SessionModal() {
       const data = await res.json();
 
       if (res.ok && data.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
+        sessionStorage.setItem('accessToken', data.accessToken);
         setShowModal(false);
         resetSessionTimers();
         toast.success('Session extended');

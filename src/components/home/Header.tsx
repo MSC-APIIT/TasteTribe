@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Logo from './Logo';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import SignUp from '../Auth/SignUp';
@@ -39,27 +39,30 @@ const Header = () => {
     setSticky(window.scrollY >= 20);
   };
 
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      signInRef.current &&
-      !signInRef.current.contains(event.target as Node)
-    ) {
-      setIsSignInOpen(false);
-    }
-    if (
-      signUpRef.current &&
-      !signUpRef.current.contains(event.target as Node)
-    ) {
-      setIsSignUpOpen(false);
-    }
-    if (
-      mobileMenuRef.current &&
-      !mobileMenuRef.current.contains(event.target as Node) &&
-      navbarOpen
-    ) {
-      setNavbarOpen(false);
-    }
-  };
+  const handleClickOutside = useCallback(
+    (event: MouseEvent) => {
+      if (
+        signInRef.current &&
+        !signInRef.current.contains(event.target as Node)
+      ) {
+        setIsSignInOpen(false);
+      }
+      if (
+        signUpRef.current &&
+        !signUpRef.current.contains(event.target as Node)
+      ) {
+        setIsSignUpOpen(false);
+      }
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        navbarOpen
+      ) {
+        setNavbarOpen(false);
+      }
+    },
+    [navbarOpen]
+  );
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);

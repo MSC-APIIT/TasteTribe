@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import SocialSignIn from '../SocialSignIn';
-import { loginUser } from '../../../lib/authClient'; // adjust path as needed
+import { loginUser } from '../../../lib/authClient';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
-// type definition
 type SignInProps = {
   onSuccess?: () => void;
 };

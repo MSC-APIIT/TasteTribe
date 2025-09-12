@@ -14,7 +14,10 @@
     "no-unused-vars": "warn",
     "semi": ["error", "always"],
     "quotes": ["error", "single"],
-    "no-console": "error"
+    // "no-console": "error",
+    "react/prop-types": "off",
+    "no-undef": "off",
+    "no-console": ["error", { "allow": ["warn", "error"] }]
   },
   "settings": {
     "react": {

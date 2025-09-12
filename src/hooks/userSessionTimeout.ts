@@ -19,7 +19,6 @@ export function useSessionTimeout() {
     if (logoutTimeoutRef.current) clearTimeout(logoutTimeoutRef.current);
     warnTimeoutRef.current = null;
     logoutTimeoutRef.current = null;
-    console.log('[SessionTimeout] Cleared timers.');
   };
 
   const resetSessionTimers = () => {
@@ -32,7 +31,6 @@ export function useSessionTimeout() {
     try {
       decoded = jwtDecode<DecodedToken>(token);
     } catch (err) {
-      console.error('[SessionTimeout] Invalid token:', err);
       forceLogout();
       return;
     }
@@ -46,9 +44,12 @@ export function useSessionTimeout() {
       return;
     }
 
-    warnTimeoutRef.current = setTimeout(() => {
-      setShowModal(true);
-    }, timeUntilExpiry - 2 * 60 * 1000);
+    warnTimeoutRef.current = setTimeout(
+      () => {
+        setShowModal(true);
+      },
+      timeUntilExpiry - 2 * 60 * 1000
+    );
 
     logoutTimeoutRef.current = setTimeout(() => {
       forceLogout();
@@ -57,7 +58,6 @@ export function useSessionTimeout() {
   };
 
   const forceLogout = () => {
-    console.log('[SessionTimeout] Force logout triggered');
     clearTimers();
     setShowModal(false);
     logout();

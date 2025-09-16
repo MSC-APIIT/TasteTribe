@@ -31,12 +31,13 @@ export function useSessionTimeout() {
     clearTimers();
 
     const token = sessionStorage.getItem('accessToken');
-    if (!token) return;
+    if (!token) return; // don't force logout if token missing
 
     let decoded: DecodedToken;
     try {
       decoded = jwtDecode<DecodedToken>(token);
     } catch (err) {
+      console.error('Invalid token:', err);
       forceLogout();
       return;
     }
@@ -50,21 +51,30 @@ export function useSessionTimeout() {
       return;
     }
 
-    warnTimeoutRef.current = setTimeout(
-      () => {
-        setShowModal(true);
-      },
-      timeUntilExpiry - 2 * 60 * 1000
-    );
+    // Warn 2 minutes before expiry
+    if (timeUntilExpiry > 2 * 60 * 1000) {
+      warnTimeoutRef.current = setTimeout(
+        () => {
+          setShowModal(true);
+        },
+        timeUntilExpiry - 2 * 60 * 1000
+      );
+    } else {
+      // If less than 2 minutes remaining, show modal immediately
+      setShowModal(true);
+    }
 
     logoutTimeoutRef.current = setTimeout(() => {
       forceLogout();
       toast.error('Session expired. You’ve been logged out.');
     }, timeUntilExpiry);
-  }, [clearTimers, forceLogout, setShowModal]);
+  }, [clearTimers, forceLogout]);
 
   useEffect(() => {
-    resetSessionTimers();
+    const token = sessionStorage.getItem('accessToken');
+    if (token) resetSessionTimers();
+
+    // Cleanup on unmount
     return clearTimers;
   }, [clearTimers, resetSessionTimers]);
 

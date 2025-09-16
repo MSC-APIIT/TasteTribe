@@ -15,11 +15,10 @@ export default function Logo() {
         className="ml-10 relative "
       />
       <span
-        className={`text-2xl font-bold text-gray-900 dark:text-white truncate ${alfa_Slab_One.className}`}
+        className={`text-xl font-bold text-gray-900 dark:text-white truncate ${alfa_Slab_One.className}`}
       >
         TasteTribe
       </span>
     </Link>
   );
 }
-

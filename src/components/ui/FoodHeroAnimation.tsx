@@ -23,7 +23,7 @@ const FoodHeroAnimation = () => {
     }, 2500);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [foodItems.length]);
 
   return (
     <div className="w-full h-64 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-lg flex flex-col items-center justify-center relative overflow-hidden">

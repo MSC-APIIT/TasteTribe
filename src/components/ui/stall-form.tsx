@@ -10,6 +10,7 @@ export function StallForm({
   onSubmit,
   initialData,
 }: {
+  // eslint-disable-next-line no-unused-vars
   onSubmit: (stall: Stall) => void;
   initialData?: Stall;
 }) {

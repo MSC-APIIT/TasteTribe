@@ -10,6 +10,7 @@ export function MenuForm({
   onSubmit,
   initialData,
 }: {
+  // eslint-disable-next-line no-unused-vars
   onSubmit: (item: MenuItem) => void;
   initialData?: MenuItem;
 }) {

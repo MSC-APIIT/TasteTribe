@@ -27,6 +27,7 @@ const StallProfilePage = () => {
     { id: '2', name: 'Fries', description: 'Crispy golden fries', price: 5 },
   ]);
 
+  // eslint-disable-next-line no-unused-vars
   const [comments, setComments] = useState<Comment[]>([
     {
       id: '1',

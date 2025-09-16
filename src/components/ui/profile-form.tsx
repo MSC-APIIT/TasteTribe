@@ -10,6 +10,7 @@ export function ProfileForm({
   onSubmit,
   initialData,
 }: {
+  // eslint-disable-next-line no-unused-vars
   onSubmit: (profile: Profile) => void;
   initialData: Profile;
 }) {

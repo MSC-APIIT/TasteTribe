@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -10,8 +9,6 @@ import {
 } from './card';
 import { Avatar, AvatarFallback, AvatarImage } from './avatar';
 import { Button } from './button';
-import { Modal } from './modal';
-import { ProfileForm } from './profile-form';
 
 export interface Profile {
   name: string;
@@ -19,15 +16,13 @@ export interface Profile {
   profilePicture: string;
 }
 
-export function ProfileCard({ initialProfile }: { initialProfile: Profile }) {
-  const [profile, setProfile] = useState(initialProfile);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleProfileUpdate = (updatedProfile: Profile) => {
-    setProfile(updatedProfile);
-    setIsModalOpen(false);
-  };
-
+export function ProfileCard({
+  profile,
+  onEdit,
+}: {
+  profile: Profile;
+  onEdit: () => void;
+}) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-4">
@@ -41,11 +36,8 @@ export function ProfileCard({ initialProfile }: { initialProfile: Profile }) {
         </div>
       </CardHeader>
       <CardContent>
-        <Button onClick={() => setIsModalOpen(true)}>Edit Profile</Button>
+        <Button onClick={onEdit}>Edit Profile</Button>
       </CardContent>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <ProfileForm onSubmit={handleProfileUpdate} initialData={profile} />
-      </Modal>
     </Card>
   );
 }

@@ -27,7 +27,7 @@ const initialStalls: Stall[] = [
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, accessToken } = useAuth();
+  const { accessToken } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [stalls, setStalls] = useState(initialStalls);
@@ -35,18 +35,14 @@ export default function ProfilePage() {
 
   useEffect(() => {
 
-    console.log(accessToken)
     const fetchProfile = async () => {
       try {
-        console.log(accessToken)
         const res = await fetch('/api/profile', {
           method: 'GET',
           headers: {
-            Authorization: `Bearer ${accessToken}`, // token
-            
+            Authorization: `Bearer ${accessToken}` // token
           },
         });
-        console.log(accessToken)
         if (!res.ok) {
           console.error('Failed to fetch profile:', res.status, res.statusText);
           return;

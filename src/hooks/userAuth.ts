@@ -7,13 +7,12 @@ import toast from 'react-hot-toast';
 export function useAuth() {
   const [user, setUser] = useState<UserDto | null>(null);
 
-  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   
   useEffect(() => {
     const loadUser = () => {
       const storedUser = sessionStorage.getItem('user');
       const token = sessionStorage.getItem('accessToken');
-      console.log(token)
       if (storedUser && token) {
         setUser(JSON.parse(storedUser));
         setAccessToken(token);

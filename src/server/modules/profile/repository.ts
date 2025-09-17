@@ -33,7 +33,6 @@ export const ProfileRepository = {
       bio: data.bio,
       profileImage: data.profileImage,
     });
-    console.log(`Profile created for userId: ${data.userId}`);
     return profile;
   },
 

@@ -13,7 +13,6 @@ export const ProfileService = {
 
     return await ProfileRepository.create({
       userId,
-      name: user.name,
       bio,
       profileImage,
     });
@@ -21,7 +20,7 @@ export const ProfileService = {
 
   updateProfile: async (
     userId: string,
-    updates: Partial<{ name: string; bio: string; profileImage: string }>
+    updates: Partial<{ name?: string; bio: string; profileImage: string }>
   ): Promise<ProfileDto | null> => {
     if (updates.name) {
       await updateUserNameById(userId, updates.name);

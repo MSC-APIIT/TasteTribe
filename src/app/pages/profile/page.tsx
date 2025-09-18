@@ -8,7 +8,9 @@ import { CreateStallCard } from '@/components/ui/create-stall-card';
 import { Modal } from '@/components/ui/modal';
 import { StallForm } from '@/components/ui/stall-form';
 import { ProfileForm } from '@/components/ui/profile-form';
-import { useAuth } from '../../../hooks/userAuth';
+import { useAuth } from '@/hooks/userAuth';
+import { useApi } from '@/hooks/useApi';
+import { ProfileView } from '@/app/types/profileView';
 
 const initialStalls: Stall[] = [
   {
@@ -28,60 +30,39 @@ const initialStalls: Stall[] = [
 export default function ProfilePage() {
   const router = useRouter();
   const { accessToken } = useAuth();
+  const api = useApi(accessToken ?? undefined);
+
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [stalls, setStalls] = useState(initialStalls);
   const [isStallModalOpen, setIsStallModalOpen] = useState(false);
 
   useEffect(() => {
-
     const fetchProfile = async () => {
       try {
-        const res = await fetch('/api/profile', {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${accessToken}` // token
-          },
-        });
-        if (!res.ok) {
-          console.error('Failed to fetch profile:', res.status, res.statusText);
-          return;
-        }
-        const data = await res.json();
+        const data = await api.get<ProfileView>('/api/profile');
         setProfile({
           name: data.name,
           bio: data.bio || 'Add bio',
           profilePicture: data.profileImage || '/default-profile.png',
         });
       } catch (err) {
-        console.error('Error fetching profile:', err);
+        console.error('Failed to fetch profile:', err);
       }
     };
 
-    fetchProfile();
-  }, [accessToken]);
+    if (accessToken) fetchProfile();
+  }, [accessToken, api]);
 
+  // Handle profile update
   const handleProfileUpdate = async (updated: Profile) => {
     try {
-      const res = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`
-        },
-        body: JSON.stringify({
-          name: updated.name,
-          bio: updated.bio,
-          profileImage: updated.profilePicture,
-        }),
+      const data = await api.put<ProfileView>('/api/profile', {
+        name: updated.name,
+        bio: updated.bio,
+        profileImage: updated.profilePicture,
       });
 
-      if (!res.ok) {
-        console.error('Failed to update profile:', res.statusText);
-        return;
-      }
-
-      const data = await res.json();
       setProfile({
         name: data.name,
         bio: data.bio || 'Add bio',
@@ -89,7 +70,7 @@ export default function ProfilePage() {
       });
       setIsProfileModalOpen(false);
     } catch (err) {
-      console.error('Error updating profile:', err);
+      console.error('Failed to update profile:', err);
     }
   };
 

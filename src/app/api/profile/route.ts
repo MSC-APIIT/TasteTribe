@@ -1,51 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { authenticateRequest } from '@/server/middleware/auth';
 import { ProfileService } from '@/server/modules/profile/service';
 import { findUserById } from '@/server/modules/auth/repository';
-import { authenticateRequest } from '@/server/modules/auth/service';
 
-//GET
 export async function GET(req: NextRequest) {
-  const auth = await authenticateRequest(req);
+  const auth = authenticateRequest(req);
   if (auth instanceof NextResponse) return auth;
 
-  const profile = await findUserById(auth.userId);
-  if (!profile) {
-    return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
-  }
+  try {
+    const result = await ProfileService.getProfile(auth.userId);
+    if (!result) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+    }
 
-  return NextResponse.json({
-    name: profile.name || 'Unknown User',
-    bio: profile.bio || '',
-    profileImage: profile.profileImage || '',
-  });
+    const { profile, name } = result;
+
+    return NextResponse.json({
+      name,
+      bio: profile.bio || '',
+      profileImage: profile.profileImage || '',
+    });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 });
+  }
 }
 
-//PUT
 export async function PUT(req: NextRequest) {
-  const auth = await authenticateRequest(req);
+  const auth = authenticateRequest(req);
   if (auth instanceof NextResponse) return auth;
 
-  const { name, bio, profileImage } = await req.json();
-
   try {
-    const updated = await ProfileService.updateProfile(auth.userId, { name, bio, profileImage });
-    return NextResponse.json(updated);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    const { name, bio, profileImage } = await req.json();
+
+    if (name) {
+      await ProfileService.updateUserName(auth.userId, name);
+    }
+
+    const updated = await ProfileService.updateProfile(auth.userId, {
+      bio,
+      profileImage,
+    });
+
+    return NextResponse.json({
+      name,
+      bio: updated?.bio || '',
+      profileImage: updated?.profileImage || '',
+    });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 });
   }
 }
 
-//POST
 export async function POST(req: NextRequest) {
-  const auth = await authenticateRequest(req);
+  const auth = authenticateRequest(req);
   if (auth instanceof NextResponse) return auth;
 
-  const { bio, profileImage } = await req.json();
-
   try {
+    const { bio, profileImage } = await req.json();
+
     const profile = await ProfileService.createProfile(auth.userId, bio, profileImage);
-    return NextResponse.json(profile, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    const user = await findUserById(auth.userId);
+
+    return NextResponse.json({
+      name: user?.name || 'Unknown User',
+      bio: profile.bio || '',
+      profileImage: profile.profileImage || '',
+    }, { status: 201 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 });
   }
 }

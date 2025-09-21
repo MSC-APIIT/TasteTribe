@@ -21,7 +21,7 @@ export async function loginUser(data: { email: string; password: string }) {
     body: JSON.stringify(data),
   });
 
-  const result = await res.json(); // read once
+  const result = await res.json();
 
   if (res.ok) {
     sessionStorage.setItem('user', JSON.stringify(result.user));

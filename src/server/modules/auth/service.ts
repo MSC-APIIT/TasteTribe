@@ -8,6 +8,7 @@ import {
 import { signAccessToken, signRefreshToken } from '@/server/lib/jwt';
 import { UserDto } from './types';
 
+
 export const registerUser = async (
   email: string,
   password: string,

@@ -1,6 +1,7 @@
 import { connectDb } from '@/server/lib/db';
 import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
+import { ProfileRepository } from '../profile/repository';
 
 const UserSchema = new Schema(
   {
@@ -21,7 +22,17 @@ export const createUser = async (
 ) => {
   await connectDb();
   const passwordHash = await bcrypt.hash(password, 10);
-  return UserModel.create({ email, passwordHash, name });
+  const user = await UserModel.create({ email, passwordHash, name });
+
+  // Automatically create profile after user is created
+  await ProfileRepository.create({
+    userId: user._id,
+    bio: '',
+    profileImage: '',
+  });
+
+  return user;
+
 };
 
 export const findUserByEmail = async (email: string) => {
@@ -45,4 +56,9 @@ export const verifyRefreshTokenHash = async (user: any, token: string) => {
 
 export const validatePassword = async (user: any, password: string) => {
   return bcrypt.compare(password, user.passwordHash);
+};
+
+export const updateUserNameById = async (id: string, name: string) => {
+  await connectDb();
+  return UserModel.findByIdAndUpdate(id, { name });
 };

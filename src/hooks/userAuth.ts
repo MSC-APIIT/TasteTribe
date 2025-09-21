@@ -7,13 +7,18 @@ import toast from 'react-hot-toast';
 export function useAuth() {
   const [user, setUser] = useState<UserDto | null>(null);
 
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  
   useEffect(() => {
     const loadUser = () => {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
+      const storedUser = sessionStorage.getItem('user');
+      const token = sessionStorage.getItem('accessToken');
+      if (storedUser && token) {
         setUser(JSON.parse(storedUser));
+        setAccessToken(token);
       } else {
         setUser(null);
+        setAccessToken(null);
       }
     };
 
@@ -27,15 +32,16 @@ export function useAuth() {
   }, []);
 
   const logout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('sessionStartTime');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('sessionStartTime');
 
     setUser(null);
+    setAccessToken(null);
     window.dispatchEvent(new Event('auth-change')); // notify listeners
     toast.success('Logged out successfully'); // toast message
   };
 
-  return { user, logout };
+  return { user, accessToken, logout };
 }

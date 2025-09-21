@@ -1,34 +1,23 @@
 'use client';
 
 import Link from 'next/link';
-
 import { useCallback, useEffect, useRef, useState } from 'react';
-
 import Logo from './Logo';
-
 import { Icon } from '@iconify/react/dist/iconify.js';
-
 import SignUp from '../Auth/SignUp';
-
 import Signin from '../Auth/SignIn';
-
 import { useAuth } from '@/hooks/userAuth';
 
 const Header = () => {
   const [sticky, setSticky] = useState(false);
-
   const [isSignInOpen, setIsSignInOpen] = useState(false);
-
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
-
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const { user, logout } = useAuth();
 
   const signInRef = useRef<HTMLDivElement>(null);
-
   const signUpRef = useRef<HTMLDivElement>(null);
-
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = () => {
@@ -60,12 +49,10 @@ const Header = () => {
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
-
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [handleClickOutside]);
@@ -80,15 +67,10 @@ const Header = () => {
 
   const getInitials = (name: string) => {
     return name
-
       .split(' ')
-
       .map((word) => word.charAt(0))
-
       .join('')
-
       .toUpperCase()
-
       .slice(0, 2);
   };
 
@@ -118,7 +100,6 @@ const Header = () => {
                 </button>
 
                 {/* Dropdown Menu */}
-
                 {isDropdownOpen && (
                   <div className="absolute right-0 top-12 w-52 bg-card border border-border rounded-lg shadow-lg py-2 z-50">
                     {/* User Info */}
@@ -158,7 +139,6 @@ const Header = () => {
                       <button
                         onClick={() => {
                           setIsDropdownOpen(false);
-
                           logout();
                         }}
                         className="w-full text-left px-4 py-2 text-destructive hover:bg-muted transition duration-200"

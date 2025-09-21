@@ -35,14 +35,14 @@ export default function SessionModal() {
       <div className="bg-card text-card-foreground p-6 rounded-lg shadow-lg max-w-sm w-full">
         <h2 className="text-lg font-semibold mb-2">Session Expiring</h2>
         <p className="text-muted-foreground mb-4">
-          Your session is about to expire. Would you like to extend it?
+          Your login is about to expire. Would you like to stay signed in?
         </p>
         <div className="flex justify-end gap-2">
           <button
             className="px-4 py-2 bg-muted text-primary rounded-md hover:bg-card"
             onClick={handleExtend}
           >
-            Extend
+            Keep me Signed In
           </button>
           <button
             className="px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-muted"

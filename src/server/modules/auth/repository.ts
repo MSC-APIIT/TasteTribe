@@ -1,6 +1,6 @@
 import { connectDb } from '@/server/lib/db';
 import mongoose, { Schema } from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { ProfileRepository } from '../profile/repository';
 
 const UserSchema = new Schema(
@@ -32,7 +32,6 @@ export const createUser = async (
   });
 
   return user;
-
 };
 
 export const findUserByEmail = async (email: string) => {

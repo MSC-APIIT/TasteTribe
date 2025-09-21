@@ -29,7 +29,7 @@ export default function RootLayout({
       </head>
 
       <body className={inter.className}>
-        <div className="bg-background text-foreground min-h-screen">
+        <div className="bg-white dark:bg-slate-800 text-foreground min-h-screen">
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

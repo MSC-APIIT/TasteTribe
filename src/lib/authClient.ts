@@ -26,8 +26,8 @@ export async function loginUser(data: { email: string; password: string }) {
   console.log(res);
 
   if (res.ok) {
-    localStorage.setItem('user', JSON.stringify(result.user));
-    localStorage.setItem('accessToken', result.accessToken);
+    sessionStorage.setItem('user', JSON.stringify(result.user));
+    sessionStorage.setItem('accessToken', result.accessToken);
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('auth-change')); // notify listeners
     }

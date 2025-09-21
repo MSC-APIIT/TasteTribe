@@ -11,13 +11,16 @@ export async function POST(req: NextRequest) {
     );
 
     const res = NextResponse.json({ user: user as UserDto, accessToken });
-    res.cookies.set('refreshToken', refreshToken, {
+    res.cookies.set({
+      name: 'refreshToken',
+      value: refreshToken,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/api/auth',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
     });
+
     return res;
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 401 });

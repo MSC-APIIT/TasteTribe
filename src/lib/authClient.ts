@@ -22,6 +22,8 @@ export async function loginUser(data: { email: string; password: string }) {
   });
 
   const result = await res.json(); // read once
+  // eslint-disable-next-line no-console
+  console.log(res);
 
   if (res.ok) {
     localStorage.setItem('user', JSON.stringify(result.user));

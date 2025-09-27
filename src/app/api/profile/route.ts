@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest } from '@/server/middleware/auth';
 import { ProfileService } from '@/server/modules/profile/service';
@@ -40,9 +41,13 @@ export async function PUT(req: NextRequest) {
     const avatar = formData.get('avatar') as File | null;
 
     let uploadedUrl: string | undefined;
+    console.log('____________________________________1');
 
     if (avatar) {
+      console.log('____________________________________2');
+
       const result = await uploadToCloudinary(avatar);
+      console.log('____________________________________', result);
       uploadedUrl = result.secure_url;
     }
 

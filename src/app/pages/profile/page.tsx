@@ -66,7 +66,8 @@ export default function ProfilePage() {
       }
 
       const data = await api.put<ProfileView>('/api/profile', formData);
-
+      // eslint-disable-next-line no-console
+      console.log('>>>>>>>>>>>>>>>>>>', data);
       const updatedProfile = {
         name: data.name,
         bio: data.bio || 'Add bio',

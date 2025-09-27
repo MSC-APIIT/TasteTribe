@@ -6,9 +6,8 @@ import toast from 'react-hot-toast';
 
 export function useAuth() {
   const [user, setUser] = useState<UserDto | null>(null);
-
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  
+
   useEffect(() => {
     const loadUser = () => {
       const storedUser = sessionStorage.getItem('user');
@@ -31,6 +30,23 @@ export function useAuth() {
     };
   }, []);
 
+  const updateUser = (userData: Partial<UserDto>) => {
+    if (!user) {
+      console.warn('Cannot update user: no user is currently logged in');
+      return;
+    }
+
+    const updatedUser = {
+      ...user,
+      ...userData,
+    };
+
+    setUser(updatedUser);
+
+    sessionStorage.setItem('user', JSON.stringify(updatedUser));
+    window.dispatchEvent(new Event('auth-change'));
+  };
+
   const logout = () => {
     sessionStorage.removeItem('user');
     sessionStorage.removeItem('accessToken');
@@ -43,5 +59,5 @@ export function useAuth() {
     toast.success('Logged out successfully'); // toast message
   };
 
-  return { user, accessToken, logout };
+  return { user, accessToken, logout, updateUser };
 }

@@ -1,16 +1,29 @@
 import { connectDb } from '@/server/lib/db';
 import mongoose, { Schema } from 'mongoose';
 
-const ProfileSchema = new Schema({
-  _id: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  bio: String,
-  profileImage: String,
-}, { timestamps: true });
+const ProfileSchema = new Schema(
+  {
+    _id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      unique: true,
+    },
+    bio: String,
+    profileImage: String,
+  },
+  { timestamps: true }
+);
 
-const ProfileModel = mongoose.models.Profile || mongoose.model('Profile', ProfileSchema);
+const ProfileModel =
+  mongoose.models.Profile || mongoose.model('Profile', ProfileSchema);
 
 export const ProfileRepository = {
-  create: async (data: { userId: string; bio?: string; profileImage?: string }) => {
+  create: async (data: {
+    userId: string;
+    bio?: string;
+    profileImage?: string;
+  }) => {
     await connectDb();
     const existing = await ProfileModel.findById(data.userId);
     if (existing) return existing;

@@ -8,21 +8,43 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 import { useAuth } from '@/hooks/userAuth';
 import Signin from '../Auth/SignIn';
 import SignUp from '../Auth/SignUp';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const Header = () => {
   const [sticky, setSticky] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [userKey, setUserKey] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
 
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const isAuthPage = pathname.startsWith('/auth/');
 
+  const router = useRouter();
+
   const signInRef = useRef<HTMLDivElement>(null);
   const signUpRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Load user key and profile image from session storage
+  useEffect(() => {
+    const loadUserData = () => {
+      try {
+        const storedUser = sessionStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setUserKey(userData.key);
+          setProfileImage(userData.profileImage);
+        }
+      } catch (error) {
+        console.error('Error loading user data from session storage:', error);
+      }
+    };
+
+    loadUserData();
+  }, [user]);
 
   const handleScroll = () => {
     setSticky(window.scrollY >= 20);
@@ -98,9 +120,25 @@ const Header = () => {
                 {/* Avatar */}
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-medium hover:bg-primary/90 transition duration-300 ease-in-out"
+                  className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-medium hover:bg-primary/90 transition duration-300 ease-in-out overflow-hidden"
                 >
-                  {getInitials(user.name!)}
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      alt="Profile Avatar"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : null}
+                  <span
+                    className={`w-full h-full flex items-center justify-center ${
+                      profileImage ? 'hidden' : 'flex'
+                    }`}
+                  >
+                    {getInitials(user?.name || userKey || 'User')}
+                  </span>
                 </button>
 
                 {/* Dropdown Menu */}
@@ -144,6 +182,7 @@ const Header = () => {
                         onClick={() => {
                           setIsDropdownOpen(false);
                           logout();
+                          router.push('/');
                         }}
                         className="w-full text-left px-4 py-2 text-destructive hover:bg-muted transition duration-200"
                       >

@@ -30,7 +30,7 @@ const initialStalls: Stall[] = [
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { accessToken } = useAuth();
+  const { accessToken, updateUser } = useAuth();
   const api = useApi(accessToken ?? undefined);
 
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -67,11 +67,21 @@ export default function ProfilePage() {
 
       const data = await api.put<ProfileView>('/api/profile', formData);
 
-      setProfile({
+      const updatedProfile = {
         name: data.name,
         bio: data.bio || 'Add bio',
         profilePicture: data.profileImage || '/default-profile.png',
-      });
+      };
+
+      setProfile(updatedProfile);
+
+      if (updateUser) {
+        updateUser({
+          name: data.name,
+          profileImage: data.profileImage,
+        });
+      }
+
       setIsProfileModalOpen(false);
     } catch (err) {
       console.error('Failed to update profile:', err);

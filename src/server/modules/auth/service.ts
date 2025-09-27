@@ -7,7 +7,7 @@ import {
 } from './repository';
 import { signAccessToken, signRefreshToken } from '@/server/lib/jwt';
 import { UserDto } from './types';
-
+import { ProfileRepository } from '../profile/repository';
 
 export const registerUser = async (
   email: string,
@@ -23,8 +23,12 @@ export const registerUser = async (
 export const loginUser = async (email: string, password: string) => {
   const user = await findUserByEmail(email);
   if (!user) throw new Error('Invalid credentials');
+
   const ok = await validatePassword(user, password);
   if (!ok) throw new Error('Invalid credentials');
+
+  // Fetch profile data to get profile image
+  const profile = await ProfileRepository.findByUserId(user._id);
 
   const accessToken = signAccessToken({ sub: user._id, email: user.email });
   const refreshToken = signRefreshToken({ sub: user._id });
@@ -32,7 +36,12 @@ export const loginUser = async (email: string, password: string) => {
   await setRefreshToken(user._id, refreshToken);
 
   return {
-    user: { id: user._id.toString(), email: user.email, name: user.name },
+    user: {
+      id: user._id.toString(),
+      email: user.email,
+      name: user.name,
+      profileImage: profile?.profileImage || null,
+    },
     accessToken,
     refreshToken,
   };

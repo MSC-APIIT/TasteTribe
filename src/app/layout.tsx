@@ -7,7 +7,7 @@ import ThemeSwitch from '@/components/home/themeSwitch';
 import LeftDrawer from '@/components/home/LeftDrawer';
 import Header from '@/components/home/Header';
 import { Toaster } from 'react-hot-toast';
-import SessionModal from '../components/Auth/SessionTimeout/SessionModal';
+import SessionModal from '@/components/Auth/SessionTimeout/SessionModal';
 
 const inter = Inter({ subsets: ['latin'] });
 

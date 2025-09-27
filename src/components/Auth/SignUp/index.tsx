@@ -7,7 +7,6 @@ import SocialSignUp from '../SocialSignUp';
 import { registerUser } from '../../../lib/authClient'; // adjust path if needed
 import toast from 'react-hot-toast';
 
-// type definition
 type SignUpProps = {
   onSuccess?: () => void;
 };
@@ -17,21 +16,26 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
 
-    const result = await registerUser({ name, email, password }); // name can be added if backend supports it
+    const result = await registerUser({ name, email, password });
 
     if (result.error) {
       setError(result.error);
       toast.error(result.error);
     } else {
       toast.success('User registered successfully!');
-      onSuccess?.(); // Close the modal
-      router.push('');
+      onSuccess?.();
+      router.push('/auth/signin');
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -56,8 +60,9 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
             name="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            disabled={isLoading}
             required
-            className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-hidden transition focus:border-primary focus-visible:shadow-none"
+            className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-hidden transition focus:border-primary focus-visible:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
         <div className="mb-[22px]">
@@ -67,8 +72,9 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
             name="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={isLoading}
             required
-            className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-hidden transition focus:border-primary focus-visible:shadow-none"
+            className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-hidden transition focus:border-primary focus-visible:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
         <div className="mb-[22px]">
@@ -78,17 +84,22 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
             name="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={isLoading}
             required
-            className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-hidden transition focus:border-primary focus-visible:shadow-none"
+            className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-hidden transition focus:border-primary focus-visible:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
         {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
         <div className="mb-9">
           <button
             type="submit"
-            className="w-full py-2 rounded-md bg-primary text-primary-foreground font-medium border border-primary hover:bg-muted hover:text-primary transition duration-300 ease-in-out"
+            disabled={isLoading}
+            className="w-full py-2 rounded-md bg-primary text-primary-foreground font-medium border border-primary hover:bg-muted hover:text-primary transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary disabled:hover:text-primary-foreground flex items-center justify-center gap-2"
           >
-            Sign Up
+            {isLoading && (
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+            )}
+            {isLoading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </div>
       </form>
@@ -106,7 +117,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
 
       <p className="text-body-secondary text-base">
         Already have an account?
-        <Link href="/signin" className="pl-2 text-primary hover:underline">
+        <Link href="/auth/signin" className="pl-2 text-primary hover:underline">
           Sign In
         </Link>
       </p>

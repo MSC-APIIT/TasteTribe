@@ -15,10 +15,14 @@ const Signin: React.FC<SignInProps> = ({ onSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
     const result = await loginUser({ email, password });
 
     if (result.error) {
@@ -29,7 +33,10 @@ const Signin: React.FC<SignInProps> = ({ onSuccess }) => {
       onSuccess?.();
       router.push('/');
     }
+
+    setIsLoading(false);
   };
+
   return (
     <>
       <div className="text-2xl mb-10 text-center mx-auto inline-block">
@@ -51,7 +58,8 @@ const Signin: React.FC<SignInProps> = ({ onSuccess }) => {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-hidden transition focus:border-primary focus-visible:shadow-none"
+            disabled={isLoading}
+            className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-hidden transition focus:border-primary focus-visible:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
         <div className="mb-[22px]">
@@ -60,16 +68,21 @@ const Signin: React.FC<SignInProps> = ({ onSuccess }) => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-hidden transition focus:border-primary focus-visible:shadow-none"
+            disabled={isLoading}
+            className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-hidden transition focus:border-primary focus-visible:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
         {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
         <div className="mb-9">
           <button
             type="submit"
-            className="w-full py-2 rounded-md bg-primary text-primary-foreground font-medium border border-primary hover:bg-muted hover:text-primary transition duration-300 ease-in-out"
+            disabled={isLoading}
+            className="w-full py-2 rounded-md bg-primary text-primary-foreground font-medium border border-primary hover:bg-muted hover:text-primary transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary disabled:hover:text-primary-foreground flex items-center justify-center gap-2"
           >
-            Sign In
+            {isLoading && (
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+            )}
+            {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
         </div>
       </form>

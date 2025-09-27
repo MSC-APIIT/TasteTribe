@@ -11,7 +11,7 @@ export function ProfileForm({
   initialData,
 }: {
   // eslint-disable-next-line no-unused-vars
-  onSubmit: (profile: Profile) => void;
+  onSubmit: (profile: Profile, file?: File) => void;
   initialData: Profile;
 }) {
   const [name, setName] = useState(initialData.name);
@@ -19,21 +19,27 @@ export function ProfileForm({
   const [profilePicture, setProfilePicture] = useState(
     initialData.profilePicture
   );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // Store the actual file
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ name, bio, profilePicture });
+    // Pass both the profile data and the file
+    onSubmit({ name, bio, profilePicture }, selectedFile || undefined);
   };
 
   const handleProfilePictureChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file); // Store the actual file
+
+      // Create preview URL for display
       const reader = new FileReader();
       reader.onload = (event) => {
         setProfilePicture(event.target?.result as string);
       };
-      reader.readAsDataURL(e.target.files[0]);
+      reader.readAsDataURL(file);
     }
   };
 

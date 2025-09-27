@@ -26,8 +26,8 @@ const Signin: React.FC<SignInProps> = ({ onSuccess }) => {
       toast.error(result.error);
     } else {
       toast.success('Login successfull!');
-      onSuccess?.(); // Close the modal
-      router.push('');
+      onSuccess?.();
+      router.push('/');
     }
   };
   return (
@@ -82,7 +82,7 @@ const Signin: React.FC<SignInProps> = ({ onSuccess }) => {
       </Link>
       <p className="text-body-secondary text-base">
         Not a member yet?{' '}
-        <Link href="/signup" className="text-primary hover:underline">
+        <Link href="/auth/signup" className="text-primary hover:underline">
           Sign Up
         </Link>
       </p>

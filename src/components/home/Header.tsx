@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Logo from './Logo';
 import { Icon } from '@iconify/react/dist/iconify.js';
-import SignUp from '../Auth/SignUp';
-import Signin from '../Auth/SignIn';
+
 import { useAuth } from '@/hooks/userAuth';
+import Signin from '../Auth/SignIn';
+import SignUp from '../Auth/SignUp';
+import { usePathname } from 'next/navigation';
 
 const Header = () => {
   const [sticky, setSticky] = useState(false);
@@ -15,6 +17,8 @@ const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const { user, logout } = useAuth();
+  const pathname = usePathname();
+  const isAuthPage = pathname.startsWith('/auth/');
 
   const signInRef = useRef<HTMLDivElement>(null);
   const signUpRef = useRef<HTMLDivElement>(null);
@@ -155,18 +159,22 @@ const Header = () => {
               </div>
             ) : (
               <div className="flex flex-wrap items-center gap-2">
-                <button
-                  className="bg-primary text-primary-foreground px-4 py-2 rounded-lg border border-primary hover:bg-muted hover:text-foreground transition duration-300 ease-in-out"
-                  onClick={() => setIsSignInOpen(true)}
-                >
-                  Sign In
-                </button>
-                <button
-                  className="bg-primary text-primary-foreground px-4 py-2 rounded-lg border border-primary hover:bg-muted hover:text-foreground transition duration-300 ease-in-out"
-                  onClick={() => setIsSignUpOpen(true)}
-                >
-                  Sign Up
-                </button>
+                {!isAuthPage && (
+                  <>
+                    <Link
+                      href="/auth/signin"
+                      className="bg-primary text-primary-foreground px-4 py-2 rounded-lg border border-primary hover:bg-muted hover:text-foreground transition duration-300 ease-in-out"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      className="bg-primary text-primary-foreground px-4 py-2 rounded-lg border border-primary hover:bg-muted hover:text-foreground transition duration-300 ease-in-out"
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -174,7 +182,7 @@ const Header = () => {
 
         {/* Sign In Modal */}
 
-        {isSignInOpen && (
+        {!isAuthPage && isSignInOpen && (
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50">
             <div
               ref={signInRef}
@@ -199,7 +207,7 @@ const Header = () => {
 
         {/* Sign Up Modal */}
 
-        {isSignUpOpen && (
+        {!isAuthPage && isSignUpOpen && (
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50">
             <div
               ref={signUpRef}

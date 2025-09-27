@@ -29,8 +29,8 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
       toast.error(result.error);
     } else {
       toast.success('User registered successfully!');
-      onSuccess?.(); // Close the modal
-      router.push('');
+      onSuccess?.();
+      router.push('/auth/signin');
     }
   };
 
@@ -106,7 +106,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
 
       <p className="text-body-secondary text-base">
         Already have an account?
-        <Link href="/signin" className="pl-2 text-primary hover:underline">
+        <Link href="/auth/signin" className="pl-2 text-primary hover:underline">
           Sign In
         </Link>
       </p>

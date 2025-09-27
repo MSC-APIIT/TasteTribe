@@ -5,6 +5,8 @@ import { Readable } from 'stream';
 export async function uploadToCloudinary(file: File) {
   console.log('[Cloudinary] Upload started');
 
+  console.log('[Cloudinary Config]', cloudinary.config());
+
   try {
     console.log(
       '[Cloudinary] Converting file to buffer:',

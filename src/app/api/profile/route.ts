@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -44,13 +42,9 @@ export async function PUT(req: NextRequest) {
     const avatar = formData.get('avatar') as File | null;
 
     let uploadedUrl: string | undefined;
-    console.log('____________________________________1');
 
     if (avatar) {
-      console.log('____________________________________2');
-
       const result = await uploadToCloudinary(avatar);
-      console.log('____________________________________', result);
       uploadedUrl = result.secure_url;
     }
 

@@ -1,22 +1,10 @@
-/* eslint-disable no-console */
 import { cloudinary } from '@/server/lib/cloudinary';
 
 export async function uploadToCloudinary(file: File) {
-  console.log('[Cloudinary] Upload started');
-
-  console.log('[Cloudinary Config]', cloudinary.config());
-
   try {
-    console.log(
-      '[Cloudinary] Converting file to buffer:',
-      file.name,
-      file.type,
-      file.size
-    );
     const buffer = Buffer.from(await file.arrayBuffer());
-    console.log('[Cloudinary] Buffer created, size:', buffer.length);
 
-    // ✅ Use base64 data URI instead of stream (works on Vercel)
+    // Use base64 data URI instead of stream (cloudinary stram is not works on Vercel)
     const dataUri = `data:${file.type};base64,${buffer.toString('base64')}`;
 
     const result = await cloudinary.uploader.upload(dataUri, {
@@ -28,13 +16,7 @@ export async function uploadToCloudinary(file: File) {
       ],
     });
 
-    console.log(
-      '[Cloudinary] Upload success:',
-      result?.public_id,
-      result?.secure_url
-    );
-
-    return result; // return JSON object directly
+    return result;
   } catch (err) {
     console.error('[Cloudinary] Upload failed:', err);
     throw err;

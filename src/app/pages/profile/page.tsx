@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ProfileCard, ProfileView } from '@/components/ui/profile-card';
+import { Profile, ProfileCard } from '@/components/ui/profile-card';
 import { StallCard, Stall } from '@/components/ui/stall-card';
 import { CreateStallCard } from '@/components/ui/create-stall-card';
 import { Modal } from '@/components/ui/modal';
@@ -12,13 +12,15 @@ import { useAuth } from '@/hooks/userAuth';
 import { useApi } from '@/hooks/useApi';
 import { toast } from 'react-hot-toast';
 import { StallDto } from '../../types/stall';
+import { Card, CardContent, CardHeader } from '@mui/material';
+import { ProfileView } from '@/app/types/profileView';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { accessToken } = useAuth();
+  const { accessToken, updateUser } = useAuth();
   const api = useApi(accessToken ?? undefined);
 
-  const [profile, setProfile] = useState<ProfileView | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [stalls, setStalls] = useState<StallDto[]>([]);
   const [isStallModalOpen, setIsStallModalOpen] = useState(false);
@@ -30,7 +32,7 @@ export default function ProfilePage() {
         setProfile({
           name: data.name,
           bio: data.bio || 'Add bio',
-          profileImage: data.profileImage || '/logo.png',
+          profilePicture: data.profileImage || '/default-profile.png',
         });
       } catch (err) {
         console.error('Failed to fetch profile:', err);
@@ -40,7 +42,8 @@ export default function ProfilePage() {
     //Stall
     const fetchStalls = async () => {
       try {
-        const data = await api.get<(StallDto & { _id?: string })[]>('/api/stall');
+        const data =
+          await api.get<(StallDto & { _id?: string })[]>('/api/stall');
         const validStalls = data
           .filter((s) => s.stallName)
           .map((s) => ({
@@ -60,19 +63,33 @@ export default function ProfilePage() {
   }, [accessToken, api]);
 
   // Handle profile update
-  const handleProfileUpdate = async (updated: ProfileView) => {
+  const handleProfileUpdate = async (updated: Profile, file?: File) => {
     try {
-      const data = await api.put<ProfileView>('/api/profile', {
-        name: updated.name,
-        bio: updated.bio,
-        profileImage: updated.profileImage,
-      });
+      const formData = new FormData();
+      formData.append('name', updated.name);
+      formData.append('bio', updated.bio || '');
+      if (file) {
+        formData.append('avatar', file); // image file from form
+      }
 
-      setProfile({
+      const data = await api.put<ProfileView>('/api/profile', formData);
+      // eslint-disable-next-line no-console
+      console.log('>>>>>>>>>>>>>>>>>>', data);
+      const updatedProfile = {
         name: data.name,
         bio: data.bio || 'Add bio',
-        profileImage: data.profileImage || '/logo.png',
-      });
+        profilePicture: data.profileImage || '/default-profile.png',
+      };
+
+      setProfile(updatedProfile);
+
+      if (updateUser) {
+        updateUser({
+          name: data.name,
+          profileImage: data.profileImage,
+        });
+      }
+
       setIsProfileModalOpen(false);
     } catch (err) {
       console.error('Failed to update profile:', err);
@@ -93,7 +110,30 @@ export default function ProfilePage() {
 
   return (
     <div style={{ paddingTop: '128px' }} className="container mx-auto py-8">
-      {profile && (
+      {!profile ? (
+        <Card className="animate-pulse">
+          <CardHeader className="flex flex-row items-center gap-4">
+            {/* Avatar skeleton */}
+            <div className="h-24 w-24 rounded-full bg-slate-500 dark:bg-slate-700" />
+
+            <div className="flex flex-col gap-3 flex-1">
+              {/* Name skeleton */}
+              <div className="h-6 w-32 bg-slate-500 dark:bg-slate-700 rounded" />
+
+              {/* Bio skeleton */}
+              <div className="space-y-2">
+                <div className="h-4 w-48 bg-slate-500 dark:bg-slate-700 rounded" />
+                <div className="h-4 w-36 bg-slate-500 dark:bg-slate-700 rounded" />
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            {/* Button skeleton */}
+            <div className="h-10 w-28 bg-slate-500 dark:bg-slate-700 rounded" />
+          </CardContent>
+        </Card>
+      ) : (
         <>
           <ProfileCard
             profile={profile}
@@ -119,13 +159,12 @@ export default function ProfilePage() {
                 //onClick={() => router.push(`/pages/stall-profile?id=${stall.id}`)}
 
                 onClick={() => {
-                  console.log('Navigating to stall:', stall.id);
                   router.push(`stall-profile/${stall.id}`);
                 }}
               />
             ))
           ) : (
-            <p className="text-muted">You haven't created any stalls yet.</p>
+            <p className="text-muted">You have not created any stalls yet.</p>
           )}
 
           <CreateStallCard onClick={() => setIsStallModalOpen(true)} />

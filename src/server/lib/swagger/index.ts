@@ -1,12 +1,13 @@
 import { schemas } from './schemas';
 import { authPaths } from './paths/auth';
+import { stallPaths } from './paths/stall';
 
 export const getSwaggerSpec = (baseUrl?: string) => {
   const getApiUrl = () => {
-    if (baseUrl) return `${baseUrl}/api`;
+    if (baseUrl) return `${baseUrl}`;
     if (process.env.NEXT_PUBLIC_API_URL)
-      return `${process.env.NEXT_PUBLIC_API_URL}/api`;
-    return 'http://localhost:3000/api';
+      return `${process.env.NEXT_PUBLIC_API_URL}`;
+    return 'http://localhost:3000';
   };
 
   return {
@@ -34,6 +35,7 @@ export const getSwaggerSpec = (baseUrl?: string) => {
     },
     paths: {
       ...authPaths,
+      ...stallPaths,
       // Future modules just import and spread here:
       // ...userPaths,
       // ...productPaths,

@@ -9,25 +9,20 @@ import {
 } from './card';
 import { Avatar, AvatarFallback, AvatarImage } from './avatar';
 import { Button } from './button';
-
-export interface Profile {
-  name: string;
-  bio: string;
-  profilePicture: string;
-}
+import { ProfileView } from '../../app/types/profileView';
 
 export function ProfileCard({
   profile,
   onEdit,
 }: {
-  profile: Profile;
+  profile: ProfileView;
   onEdit: () => void;
 }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-4">
         <Avatar className="h-24 w-24">
-          <AvatarImage src={profile.profilePicture} alt={profile.name} />
+          <AvatarImage src={profile.profileImage} alt={profile.name} />
           <AvatarFallback>{profile.name[0]}</AvatarFallback>
         </Avatar>
         <div>
@@ -41,3 +36,4 @@ export function ProfileCard({
     </Card>
   );
 }
+export type { ProfileView };

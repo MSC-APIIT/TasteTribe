@@ -4,25 +4,26 @@ import { useState } from 'react';
 import { Input } from './input';
 import { Label } from './label';
 import { Button } from './button';
-import { Profile } from './profile-card';
+import { ProfileView } from './profile-card';
+
 
 export function ProfileForm({
   onSubmit,
   initialData,
 }: {
   // eslint-disable-next-line no-unused-vars
-  onSubmit: (profile: Profile) => void;
-  initialData: Profile;
+  onSubmit: (profile: ProfileView) => void;
+  initialData: ProfileView;
 }) {
   const [name, setName] = useState(initialData.name);
   const [bio, setBio] = useState(initialData.bio);
-  const [profilePicture, setProfilePicture] = useState(
-    initialData.profilePicture
+  const [profileImage, setprofileImage] = useState(
+    initialData.profileImage
   );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ name, bio, profilePicture });
+    onSubmit({ name, bio, profileImage });
   };
 
   const handleProfilePictureChange = (
@@ -31,7 +32,7 @@ export function ProfileForm({
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        setProfilePicture(event.target?.result as string);
+        setprofileImage(event.target?.result as string);
       };
       reader.readAsDataURL(e.target.files[0]);
     }
@@ -40,34 +41,34 @@ export function ProfileForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="profileName">Name</Label>
+        <Label htmlFor="name">Name</Label>
         <Input
-          id="profileName"
+          id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
         />
       </div>
       <div>
-        <Label htmlFor="profileBio">Bio</Label>
+        <Label htmlFor="bio">Bio</Label>
         <Input
-          id="profileBio"
+          id="bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           required
         />
       </div>
       <div>
-        <Label htmlFor="profilePicture">Profile Picture</Label>
+        <Label htmlFor="profileImage">Profile Picture</Label>
         <Input
-          id="profilePicture"
+          id="profileImage"
           type="file"
           accept="image/*"
           onChange={handleProfilePictureChange}
         />
-        {profilePicture && (
+        {profileImage && (
           <img
-            src={profilePicture}
+            src={profileImage}
             alt="Profile"
             className="mt-4 h-32 w-32 object-cover rounded-full"
           />

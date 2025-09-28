@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
     const user = await registerUser(email, password, name);
 
-    return NextResponse.json({ success: true, user }, { status: 201 });
+    return NextResponse.json({ success: true, user }, { status: 200 });
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : 'Something went wrong';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MenuItemCard, MenuItem } from '@/components/ui/menu-item-card';
 import { MenuForm } from '@/components/ui/menu-form';
 import { Modal } from '@/components/ui/modal';
@@ -8,15 +8,20 @@ import { Button } from '@/components/ui/button';
 import { CommentCard, Comment } from '@/components/ui/comment-card';
 import { StallForm } from '@/components/ui/stall-form';
 import { Stall } from '@/components/ui/stall-card';
+import { useApi } from '@/hooks/useApi';
+import { useAuth } from '@/hooks/userAuth';
+import toast from 'react-hot-toast';
 
-const StallProfilePage = () => {
-  const [stall, setStall] = useState<Stall>({
-    id: '1',
-    name: 'Artisan Kitchen',
-    description:
-      'Authentic flavors crafted with passion and finest ingredients. Experience culinary excellence in every bite.',
-    coverImages: ['/logo.png'],
-  });
+interface StallProfilePageProps {
+  stallId: string;
+}
+
+export default function StallProfilePage({ stallId }: StallProfilePageProps) {
+  const { accessToken } = useAuth();
+  const api = useApi(accessToken ?? undefined);
+  console.log('Access Token:', accessToken);
+
+  const [stall, setStall] = useState<Stall | null>(null);
 
   const [menuItems, setMenuItems] = useState<MenuItem[]>([
     {
@@ -77,6 +82,23 @@ const StallProfilePage = () => {
     undefined
   );
 
+  useEffect(() => {
+    const fetchStall = async () => {
+      try {
+        console.log('Fetching stall with ID:', stallId);
+        const data = await api.get<Stall>(`/api/stall/${stallId}`);
+        setStall(data);
+      } catch (err) {
+        console.error('Failed to fetch stall:', err);
+      }
+    };
+
+    if (stallId) {
+      console.log('Fetched stalls:', stall);
+      fetchStall();
+    }
+  }, [accessToken, stallId, api]);
+
   const handleAddItem = (item: MenuItem) => {
     setMenuItems([...menuItems, item]);
     setIsMenuModalOpen(false);
@@ -92,9 +114,15 @@ const StallProfilePage = () => {
     setMenuItems(menuItems.filter((i) => i.id !== id));
   };
 
-  const handleStallUpdate = (updatedStall: Stall) => {
-    setStall(updatedStall);
-    setIsStallModalOpen(false);
+  const handleStallUpdate = async (updatedStall: Stall) => {
+    try {
+      const response = await api.put<Stall>(`/api/stall/${stallId}`, updatedStall);
+      setStall(response);
+      setIsStallModalOpen(false);
+      toast.success('Stall Updated successfully!');
+    } catch (error) {
+      console.error('Failed to update stall:', error);
+    }
   };
 
   const averageRating =
@@ -114,31 +142,32 @@ const StallProfilePage = () => {
                 {/* Cover Images */}
                 <div className="flex-shrink-0">
                   <div className="grid grid-cols-2 gap-3 w-full lg:w-80">
-                    {stall.coverImages.map((image, index) => (
+                    {stall?.stallImage?.map((image, index) => (
                       <div
                         key={index}
                         className="relative aspect-square rounded-lg overflow-hidden shadow-md"
                       >
                         <img
                           src={image}
-                          alt={`${stall.name} - Image ${index + 1}`}
+                          alt={`${stall?.stallName} - Image ${index + 1}`}
                           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                         />
                       </div>
                     ))}
                     {/* Placeholder for additional images */}
-                    {Array.from({
-                      length: Math.max(0, 4 - stall.coverImages.length),
-                    }).map((_, index) => (
-                      <div
-                        key={`placeholder-${index}`}
-                        className="aspect-square rounded-lg bg-muted border border-dashed border-muted-foreground/30 flex items-center justify-center"
-                      >
-                        <span className="text-muted-foreground text-sm">
-                          Add Image
-                        </span>
-                      </div>
-                    ))}
+                    {stall?.stallImage &&
+                      Array.from({
+                        length: Math.max(0, 4 - stall.stallImage.length),
+                      }).map((_, index) => (
+                        <div
+                          key={`placeholder-${index}`}
+                          className="aspect-square rounded-lg bg-muted border border-dashed border-muted-foreground/30 flex items-center justify-center"
+                        >
+                          <span className="text-muted-foreground text-sm">
+                            Add Image
+                          </span>
+                        </div>
+                      ))}
                   </div>
                 </div>
 
@@ -147,10 +176,10 @@ const StallProfilePage = () => {
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                     <div>
                       <h1 className="text-4xl font-bold text-foreground mb-2">
-                        {stall.name}
+                        {stall?.stallName}
                       </h1>
                       <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-                        {stall.description}
+                        {stall?.stallDescription}
                       </p>
                     </div>
                     <Button
@@ -293,10 +322,11 @@ const StallProfilePage = () => {
         isOpen={isStallModalOpen}
         onClose={() => setIsStallModalOpen(false)}
       >
-        <StallForm onSubmit={handleStallUpdate} initialData={stall} />
+        <StallForm
+          onSubmit={handleStallUpdate}
+          initialData={stall ?? undefined}
+        />
       </Modal>
     </div>
   );
-};
-
-export default StallProfilePage;
+}

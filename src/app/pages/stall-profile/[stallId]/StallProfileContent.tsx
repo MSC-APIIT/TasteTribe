@@ -19,7 +19,6 @@ interface StallProfilePageProps {
 export default function StallProfilePage({ stallId }: StallProfilePageProps) {
   const { accessToken } = useAuth();
   const api = useApi(accessToken ?? undefined);
-  console.log('Access Token:', accessToken);
 
   const [stall, setStall] = useState<Stall | null>(null);
 
@@ -85,7 +84,6 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
   useEffect(() => {
     const fetchStall = async () => {
       try {
-        console.log('Fetching stall with ID:', stallId);
         const data = await api.get<Stall>(`/api/stall/${stallId}`);
         setStall(data);
       } catch (err) {
@@ -94,7 +92,6 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
     };
 
     if (stallId) {
-      console.log('Fetched stalls:', stall);
       fetchStall();
     }
   }, [accessToken, stallId, api]);
@@ -116,7 +113,10 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
 
   const handleStallUpdate = async (updatedStall: Stall) => {
     try {
-      const response = await api.put<Stall>(`/api/stall/${stallId}`, updatedStall);
+      const response = await api.put<Stall>(
+        `/api/stall/${stallId}`,
+        updatedStall
+      );
       setStall(response);
       setIsStallModalOpen(false);
       toast.success('Stall Updated successfully!');

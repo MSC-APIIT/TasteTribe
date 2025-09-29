@@ -43,4 +43,15 @@ export const MenuRepository = {
     await connectDb();
     return MenuModel.find({ stallId });
   },
+
+  findByIds: async (ids: string[]) => {
+    await connectDb();
+    if (!ids || ids.length === 0) return [];
+    const docs = await MenuModel.find({ _id: { $in: ids } })
+      .lean()
+      .exec();
+    // map & preserve order of ids
+    const map = new Map(docs.map((d: any) => [String(d._id), d]));
+    return ids.map((id) => map.get(id)).filter(Boolean);
+  },
 };

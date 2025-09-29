@@ -59,4 +59,14 @@ export const StallRepository = {
     await connectDb();
     return StallModel.findOne({ _id: stallId, profileId });
   },
+
+  findByIds: async (ids: string[]) => {
+    await connectDb();
+    if (!ids?.length) return [];
+    const docs = await StallModel.find({ _id: { $in: ids } })
+      .lean()
+      .exec();
+    const map = new Map(docs.map((d: any) => [String(d._id), d]));
+    return ids.map((id) => map.get(id)).filter(Boolean);
+  },
 };

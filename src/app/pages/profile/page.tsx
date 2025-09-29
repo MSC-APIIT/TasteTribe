@@ -24,6 +24,7 @@ export default function ProfilePage() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [stalls, setStalls] = useState<StallDto[]>([]);
   const [isStallModalOpen, setIsStallModalOpen] = useState(false);
+  const [loadingStalls, setLoadingStalls] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -42,6 +43,7 @@ export default function ProfilePage() {
     //Stall
     const fetchStalls = async () => {
       try {
+        setLoadingStalls(true);
         const data =
           await api.get<(StallDto & { _id?: string })[]>('/api/stall');
         const validStalls = data
@@ -53,6 +55,8 @@ export default function ProfilePage() {
         setStalls(validStalls);
       } catch (err) {
         console.error('Failed to fetch stall:', err);
+      } finally {
+        setLoadingStalls(false);
       }
     };
 
@@ -69,12 +73,10 @@ export default function ProfilePage() {
       formData.append('name', updated.name);
       formData.append('bio', updated.bio || '');
       if (file) {
-        formData.append('avatar', file); // image file from form
+        formData.append('avatar', file);
       }
 
       const data = await api.put<ProfileView>('/api/profile', formData);
-      // eslint-disable-next-line no-console
-      console.log('>>>>>>>>>>>>>>>>>>', data);
       const updatedProfile = {
         name: data.name,
         bio: data.bio || 'Add bio',
@@ -151,7 +153,21 @@ export default function ProfilePage() {
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4">My Stalls</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {stalls.length > 0 ? (
+          {loadingStalls ? (
+            // Skeleton cards
+            Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader>
+                  <div className="h-40 w-full bg-slate-500 dark:bg-slate-700 rounded" />
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="h-6 w-32 bg-slate-500 dark:bg-slate-700 rounded" />
+                  <div className="h-4 w-48 bg-slate-500 dark:bg-slate-700 rounded" />
+                  <div className="h-10 w-24 bg-slate-500 dark:bg-slate-700 rounded" />
+                </CardContent>
+              </Card>
+            ))
+          ) : stalls.length > 0 ? (
             stalls.map((stall) => (
               <StallCard
                 key={stall.id}

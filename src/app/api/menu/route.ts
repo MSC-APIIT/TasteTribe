@@ -102,3 +102,28 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  const auth = authenticateRequest(req);
+  if (auth instanceof NextResponse) return auth;
+
+  try {
+    const { searchParams } = new URL(req.url);
+    const menuId = searchParams.get('menuId');
+
+    if (!menuId) {
+      return NextResponse.json(
+        { error: 'menuId is required' },
+        { status: 400 }
+      );
+    }
+
+    const deleted = await MenuService.deleteMenu(menuId);
+    if (!deleted) {
+      return NextResponse.json({ error: 'Menu not found' }, { status: 404 });
+    }
+    return NextResponse.json({ message: 'Menu deleted successfully' });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

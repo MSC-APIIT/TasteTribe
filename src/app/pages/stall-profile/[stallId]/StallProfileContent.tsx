@@ -208,12 +208,24 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
     }
   };
 
+  const fetchMenuItems = async () => {
+    try {
+      const response = await api.get<MenuItem[]>(
+        '/api/menu?stallId=' + stallId
+      );
+      setMenuItems(response);
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Failed to fetch menu items');
+    }
+  };
+
   const handleDeleteItem = async (id: string) => {
     try {
-      await api.delete(`/api/menu/${id}`);
+      await api.delete(`/api/menu?menuId=${id}`);
 
       // Use functional update for consistent state management
-      setMenuItems((prevItems) => prevItems.filter((i) => i.id !== id));
+      await fetchMenuItems();
       toast.success('Menu item deleted successfully!');
     } catch (err: any) {
       console.error(err);
@@ -379,7 +391,7 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
                       setEditingItem(item);
                       setIsMenuModalOpen(true);
                     }}
-                    onDelete={() => handleDeleteItem(item.id)}
+                    onDelete={() => handleDeleteItem(item._id!)}
                   />
                 ))}
                 {/* Add New Item Card */}

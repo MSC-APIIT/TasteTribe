@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { FiSearch } from 'react-icons/fi';
+import { FiSearch, FiX } from 'react-icons/fi';
 import { FaStar } from 'react-icons/fa';
 import FoodHeroAnimation from '@/components/ui/FoodHeroAnimation';
 import FoodShowcase from '@/components/ui/FoodShowCase';
@@ -27,6 +27,75 @@ interface Comment {
   user: string;
   text: string;
   replies: Comment[];
+}
+
+// Auth Modal Component
+function AuthModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+        >
+          <FiX className="w-6 h-6" />
+        </button>
+
+        {/* Modal Content */}
+        <div className="text-center">
+          <div className="mb-4 flex justify-center">
+            <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
+              <FaStar className="w-8 h-8 text-orange-500" />
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Join TasteTribe
+          </h2>
+
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            Sign in to rate dishes and share your thoughts with the community
+          </p>
+
+          {/* Action Buttons */}
+          <div className="space-y-3">
+            <button
+              onClick={() => {
+                // Navigate to login page
+                window.location.href = '/auth/signin';
+              }}
+              className="w-full px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+            >
+              Sign In
+            </button>
+
+            <button
+              onClick={() => {
+                // Navigate to signup page
+                window.location.href = '/auth/signup';
+              }}
+              className="w-full px-6 py-3 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-900 dark:text-white font-semibold rounded-lg border-2 border-gray-300 dark:border-slate-600 transition-colors duration-200"
+            >
+              Create Account
+            </button>
+          </div>
+
+          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+            New to TasteTribe? Create an account to get started
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // Skeleton component for loading state
@@ -99,9 +168,50 @@ function MenuItemSkeleton() {
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [ratings, setRatings] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
   const { accessToken } = useAuth();
   const api = useApi(accessToken ?? undefined);
+
+  // Fetch user's ratings for all menu items
+  const fetchUserRatings = async (items: MenuItem[]) => {
+    if (!accessToken) {
+      return;
+    }
+
+    try {
+      const ratingsPromises = items.map(async (item) => {
+        try {
+          const data = await api.get<{
+            userRating?: number;
+            averageRating?: number;
+          }>(`/api/menuRatings?menuId=${item.id}`);
+          return { menuId: item.id, rating: data.userRating || 0 };
+        } catch (err) {
+          console.error(`Failed to fetch rating for menu ${item.id}:`, err);
+          return { menuId: item.id, rating: 0 };
+        }
+      });
+
+      const ratingsData = await Promise.all(ratingsPromises);
+
+      const ratingsMap = ratingsData.reduce(
+        (acc, { menuId, rating }) => {
+          if (rating > 0) {
+            acc[menuId] = rating;
+          }
+          return acc;
+        },
+        {} as Record<number, number>
+      );
+
+      setRatings(ratingsMap);
+    } catch (err) {
+      console.error('Failed to fetch user ratings:', err);
+    }
+  };
 
   useEffect(() => {
     const fetchPopularMenus = async () => {
@@ -120,8 +230,73 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Separate useEffect for fetching ratings when accessToken becomes available
+  useEffect(() => {
+    if (accessToken && menuItems.length > 0) {
+      fetchUserRatings(menuItems);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, menuItems.length]);
+
+  const handleStarClick = (menuId: number, rating: number) => {
+    if (!accessToken) {
+      setShowAuthModal(true);
+      return;
+    }
+    submitMenuRating(menuId, rating);
+  };
+
+  const handleCommentClick = () => {
+    if (!accessToken) {
+      setShowAuthModal(true);
+      return;
+    }
+    // Continue with comment submission logic
+  };
+
+  const submitMenuRating = async (menuId: number, rating: number) => {
+    try {
+      // Submit the rating
+      await api.post('/api/menuRatings', {
+        menuId,
+        rating,
+      });
+
+      // Immediately update local state
+      setRatings((prev) => ({
+        ...prev,
+        [menuId]: rating,
+      }));
+
+      // Fetch updated menu data to get new average rating
+      const updatedData = await api.get<{ averageRating: number }>(
+        `/api/menuRatings?menuId=${menuId}`
+      );
+
+      // Update the menu item with new average rating
+      setMenuItems((prevItems) =>
+        prevItems.map((item) =>
+          item.id === menuId
+            ? {
+                ...item,
+                averageRating: updatedData.averageRating || item.averageRating,
+              }
+            : item
+        )
+      );
+    } catch (err) {
+      console.error('Failed to submit rating:', err);
+    }
+  };
+
   return (
     <>
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
+
       {/* Hero Section - Theme-aware Background with Professional Styling */}
       <section className="relative bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-foreground min-h-screen overflow-hidden">
         {/* Background Pattern */}
@@ -257,15 +432,25 @@ export default function Home() {
                       <h3 className="text-lg font-medium text-card-foreground mb-2">
                         Your Rating:
                       </h3>
-                      <div className="flex text-3xl text-muted-foreground">
+                      <div className="flex text-3xl">
                         {[...Array(5)].map((_, i) => (
                           <FaStar
                             key={i}
-                            className="cursor-pointer hover:text-yellow-400 transition-colors duration-200"
-                            // Add onClick to handle rating input
+                            onClick={() => handleStarClick(item.id, i + 1)}
+                            className={`cursor-pointer transition-colors duration-200 hover:scale-110 ${
+                              i < (ratings[item.id] || 0)
+                                ? 'text-yellow-400'
+                                : 'text-gray-300 dark:text-gray-600 hover:text-yellow-300'
+                            }`}
                           />
                         ))}
                       </div>
+                      {accessToken && ratings[item.id] && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          You rated this {ratings[item.id]} star
+                          {ratings[item.id] !== 1 ? 's' : ''}
+                        </p>
+                      )}
                     </div>
 
                     {/* Comments Section */}
@@ -313,9 +498,13 @@ export default function Home() {
                           className="w-full p-2 border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-orange-500"
                           rows={2}
                           placeholder="Add your comment..."
+                          onClick={handleCommentClick}
                         ></textarea>
 
-                        <button className="mt-2 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors duration-200">
+                        <button
+                          onClick={handleCommentClick}
+                          className="mt-2 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors duration-200"
+                        >
                           Post Comment
                         </button>
                       </div>

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 'use client';
 
@@ -287,7 +286,11 @@ function CommentItem({
   );
 }
 
-export default function PopularDishes() {
+interface PopularDishesProps {
+  searchQuery?: string;
+}
+
+export default function PopularDishes({ searchQuery }: PopularDishesProps) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [ratings, setRatings] = useState<Record<number, number>>({});
   const [comments, setComments] = useState<Record<number, Comment[]>>({});
@@ -315,7 +318,6 @@ export default function PopularDishes() {
           `/api/menuComments?menuId=${menuId}`
         );
 
-        // API already returns comments with nested replies, so just use it directly
         setComments((prev) => ({
           ...prev,
           [menuId]: data,
@@ -383,7 +385,9 @@ export default function PopularDishes() {
     const fetchPopularMenus = async () => {
       try {
         setLoading(true);
-        const data = await api.get<MenuItem[]>('/api/menu/popular?limit=10');
+        const data = await api.get<MenuItem[]>(
+          `/api/menu/popular?limit=10${searchQuery ? `&query=${encodeURIComponent(searchQuery)}` : ''}`
+        );
         setMenuItems(data);
         await fetchAllComments(data);
       } catch (err) {
@@ -394,14 +398,13 @@ export default function PopularDishes() {
     };
 
     fetchPopularMenus();
-  }, [api, fetchAllComments]);
+  }, [api, fetchAllComments, searchQuery]);
 
-  // Fetch user ratings when accessToken changes
   useEffect(() => {
     if (accessToken && menuItems.length > 0) {
       fetchUserRatings(menuItems);
     }
-  }, [accessToken, menuItems.length]);
+  }, [accessToken, fetchUserRatings, menuItems, menuItems.length]);
 
   const handleStarClick = (menuId: number, rating: number) => {
     if (!accessToken) {

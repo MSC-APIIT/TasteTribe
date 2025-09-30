@@ -121,4 +121,102 @@ export const MenuService = {
 
     return result;
   },
+
+  searchMenus: async (query: string, limit: number = 10) => {
+    const searchTerm = query.toLowerCase().trim();
+
+    if (!searchTerm) {
+      return [];
+    }
+
+    // 1) Search menus by name
+    const matchingMenus = await MenuRepository.searchByName(searchTerm);
+
+    if (!matchingMenus?.length) {
+      return [];
+    }
+
+    // 2) Get all stalls to search by stall name
+    const stallIds = Array.from(
+      new Set(matchingMenus.map((m: any) => String(m.stallId)))
+    );
+
+    const stalls = await StallRepository.findByIds(stallIds);
+
+    // Filter menus by either menu name or stall name match
+    const filteredMenus = matchingMenus.filter((menu: any) => {
+      const menuNameMatch = menu.name.toLowerCase().includes(searchTerm);
+      const stall = stalls.find(
+        (s: any) => String(s._id) === String(menu.stallId)
+      );
+      const stallNameMatch = stall?.stallName
+        ?.toLowerCase()
+        .includes(searchTerm);
+      return menuNameMatch || stallNameMatch;
+    });
+
+    // Limit results
+    const limitedMenus = filteredMenus.slice(0, limit);
+
+    if (!limitedMenus.length) {
+      return [];
+    }
+
+    const menuIds = limitedMenus.map((m: any) => String(m._id));
+
+    // 3) Get rating stats for these menus
+    const stats = await MenuRatingRepository.getMenuStats(menuIds);
+
+    // Create stall map
+    const stallMap = new Map(stalls.map((s: any) => [String(s._id), s]));
+
+    // 4) Calculate overall rating for each stall
+    const stallRatings = new Map<string, { total: number; count: number }>();
+
+    for (const menu of limitedMenus) {
+      const stallId = String((menu as any).stallId);
+      const stat = stats.find(
+        (s: any) => String(s._id) === String((menu as any)._id)
+      );
+
+      if (stat && stat.averageRating > 0) {
+        if (!stallRatings.has(stallId)) {
+          stallRatings.set(stallId, { total: 0, count: 0 });
+        }
+        const current = stallRatings.get(stallId)!;
+        current.total += stat.averageRating;
+        current.count += 1;
+      }
+    }
+
+    // 5) Fetch comments
+    const commentsByMenu = await MenuCommentRepository.findByMenuIds(menuIds);
+
+    // 6) Format results (same structure as getPopularMenus)
+    const result = limitedMenus.map((menu: any) => {
+      const stat = stats.find((s: any) => String(s._id) === String(menu._id));
+      const stall = stallMap.get(String(menu.stallId));
+      const stallId = String(menu.stallId);
+
+      const stallRatingData = stallRatings.get(stallId);
+      const stallOverallRating = stallRatingData
+        ? stallRatingData.total / stallRatingData.count
+        : 0;
+
+      return {
+        id: String(menu._id),
+        name: menu.name,
+        images: menu.images || [],
+        description: menu.description || '',
+        price: `LKR ${menu.price.toFixed(2)}`,
+        averageRating: stat?.averageRating || 0,
+        ratingCount: stat?.ratingCount || 0,
+        stallName: stall?.stallName || 'Unknown Stall',
+        stallOverallRating: Number(stallOverallRating.toFixed(1)),
+        comments: commentsByMenu[String(menu._id)] || [],
+      };
+    });
+
+    return result;
+  },
 };

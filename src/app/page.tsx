@@ -9,6 +9,17 @@ import PopularDishes from './popularDishes.fragment';
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [tempInput, setTempInput] = useState('');
+
+  const handleSearch = () => {
+    setSearchTerm(tempInput.trim());
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   return (
     <>
@@ -46,16 +57,20 @@ export default function Home() {
               type="text"
               placeholder="Search for stalls or dishes..."
               className="w-full px-4 py-3 bg-background/80 border-2 border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 backdrop-blur-sm shadow-lg"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={tempInput}
+              onChange={(e) => setTempInput(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
-            <FiSearch className="absolute right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground text-xl" />
+            <FiSearch
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground text-xl cursor-pointer"
+              onClick={handleSearch}
+            />
           </div>
         </div>
       </section>
 
       {/* Popular Dishes Section */}
-      <PopularDishes />
+      <PopularDishes searchQuery={searchTerm || undefined} />
     </>
   );
 }

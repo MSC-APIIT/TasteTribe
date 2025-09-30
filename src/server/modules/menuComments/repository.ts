@@ -31,11 +31,19 @@ export const MenuCommentRepository = {
     parentId?: string
   ) => {
     await connectDb();
+
+    // Convert string IDs to ObjectIds
+    const menuObjectId = new mongoose.Types.ObjectId(menuId);
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const parentObjectId = parentId
+      ? new mongoose.Types.ObjectId(parentId)
+      : null;
+
     return MenuCommentModel.create({
-      menuId,
-      userId,
+      menuId: menuObjectId,
+      userId: userObjectId,
       text,
-      parentId: parentId || null,
+      parentId: parentObjectId,
     });
   },
 
@@ -58,11 +66,13 @@ export const MenuCommentRepository = {
     const userMap = new Map<string, string>();
 
     if (UserModel) {
-      const users = await UserModel.find({ _id: { $in: userIds } })
+      const users = await UserModel.find({
+        _id: { $in: userIds.map((id) => new mongoose.Types.ObjectId(id)) },
+      })
         .lean()
         .exec();
       users.forEach((u: any) =>
-        userMap.set(String(u._id), u.displayName || u.name || String(u._id))
+        userMap.set(String(u._id), u.name || u.email || String(u._id))
       );
     } else {
       userIds.forEach((id) => userMap.set(id, id));
@@ -85,7 +95,10 @@ export const MenuCommentRepository = {
 };
 
 function nestComments(raw: any[], userMap: Map<string, string>): CommentDto[] {
-  const map = new Map<string, CommentDto & { parentId: string | null }>();
+  const map = new Map<
+    string,
+    CommentDto & { parentId: string | null; createdAt: string }
+  >();
 
   raw.forEach((c) => {
     map.set(String(c._id), {
@@ -94,6 +107,9 @@ function nestComments(raw: any[], userMap: Map<string, string>): CommentDto[] {
       text: c.text,
       replies: [],
       parentId: c.parentId ? String(c.parentId) : null,
+      createdAt: c.createdAt
+        ? c.createdAt.toISOString()
+        : new Date().toISOString(),
     });
   });
 

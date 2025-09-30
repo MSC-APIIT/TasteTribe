@@ -1,6 +1,7 @@
 export interface CommentDto {
   id: string;
-  user: string; // display name (fallback to userId)
+  user: string;
   text: string;
   replies: CommentDto[];
+  createdAt?: string;
 }

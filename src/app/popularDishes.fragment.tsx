@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 'use client';
 
 import * as React from 'react';
 import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
-import { FiX } from 'react-icons/fi';
+import { FiX, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { FaStar } from 'react-icons/fa';
 import { useApi } from '@/hooks/useApi';
 import { useAuth } from '@/hooks/userAuth';
@@ -149,7 +150,7 @@ function MenuItemSkeleton() {
   );
 }
 
-// Comment Component with improved reply UI
+// Comment Component with improved reply UI and expand/collapse
 function CommentItem({
   comment,
   onReply,
@@ -171,6 +172,9 @@ function CommentItem({
   isReplying: boolean;
   submitting: boolean;
 }) {
+  const [isExpanded, setIsExpanded] = useState(true); // Auto-expand if there are replies
+  const hasReplies = comment.replies && comment.replies.length > 0;
+
   return (
     <div className="space-y-3">
       <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4 border border-gray-100 dark:border-slate-600">
@@ -184,14 +188,37 @@ function CommentItem({
         </div>
         <p className="text-muted-foreground text-sm mb-3">{comment.text}</p>
 
-        {accessToken && (
-          <button
-            onClick={() => onReply(comment._id, comment.userName)}
-            className="text-xs font-medium text-orange-500 hover:text-orange-600 transition-colors"
-          >
-            Reply
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          {accessToken && (
+            <button
+              onClick={() => onReply(comment._id, comment.userName)}
+              className="text-xs font-medium text-orange-500 hover:text-orange-600 transition-colors"
+            >
+              Reply
+            </button>
+          )}
+
+          {hasReplies && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-1 text-xs font-medium text-blue-500 hover:text-blue-600 transition-colors"
+            >
+              {isExpanded ? (
+                <>
+                  <FiChevronUp className="w-3 h-3" />
+                  Hide {comment.replies!.length}{' '}
+                  {comment.replies!.length === 1 ? 'reply' : 'replies'}
+                </>
+              ) : (
+                <>
+                  <FiChevronDown className="w-3 h-3" />
+                  Show {comment.replies!.length}{' '}
+                  {comment.replies!.length === 1 ? 'reply' : 'replies'}
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Reply Input - Shows directly under the comment being replied to */}
@@ -235,10 +262,10 @@ function CommentItem({
         </div>
       )}
 
-      {/* Replies */}
-      {comment.replies && comment.replies.length > 0 && (
+      {/* Replies - Collapsible */}
+      {hasReplies && isExpanded && (
         <div className="ml-6 space-y-3">
-          {comment.replies.map((reply) => (
+          {comment.replies!.map((reply) => (
             <div
               key={reply._id}
               className="bg-white dark:bg-slate-600/50 p-3 rounded-md border border-gray-100 dark:border-slate-500"
@@ -280,8 +307,40 @@ export default function PopularDishes() {
   const { accessToken } = useAuth();
   const api = useApi(accessToken ?? undefined);
 
+  // Fetch comments for a single menu item
+  const fetchCommentsForMenu = useCallback(
+    async (menuId: number) => {
+      try {
+        const data = await api.get<Comment[]>(
+          `/api/menuComments?menuId=${menuId}`
+        );
+
+        // API already returns comments with nested replies, so just use it directly
+        setComments((prev) => ({
+          ...prev,
+          [menuId]: data,
+        }));
+      } catch (err) {
+        console.error(`Failed to fetch comments for menu ${menuId}:`, err);
+        setComments((prev) => ({
+          ...prev,
+          [menuId]: [],
+        }));
+      }
+    },
+    [api]
+  );
+
+  // Fetch comments for all menu items
+  const fetchAllComments = useCallback(
+    async (items: MenuItem[]) => {
+      await Promise.all(items.map((item) => fetchCommentsForMenu(item.id)));
+    },
+    [fetchCommentsForMenu]
+  );
+
   // Fetch user's ratings for all menu items
-  const fetchUserRatings = React.useCallback(
+  const fetchUserRatings = useCallback(
     async (items: MenuItem[]) => {
       if (!accessToken) return;
 
@@ -319,51 +378,14 @@ export default function PopularDishes() {
     [accessToken, api]
   );
 
-  // Fetch comments for menu items
-  const fetchComments = useCallback(
-    async (items: MenuItem[]) => {
-      try {
-        const commentsMap: Record<number, Comment[]> = {};
-
-        await Promise.all(
-          items.map(async (item) => {
-            try {
-              const data = await api.get<Comment[]>(
-                `/api/menuComments?menuId=${item.id}`
-              );
-
-              const topLevelComments = data.filter((c) => !c.parentId);
-              const commentsWithReplies = topLevelComments.map((comment) => ({
-                ...comment,
-                replies: data.filter((c) => c.parentId === comment._id),
-              }));
-
-              commentsMap[item.id] = commentsWithReplies;
-            } catch (err) {
-              console.error(
-                `Failed to fetch comments for menu ${item.id}:`,
-                err
-              );
-              commentsMap[item.id] = [];
-            }
-          })
-        );
-
-        setComments(commentsMap);
-      } catch (err) {
-        console.error('Failed to fetch comments:', err);
-      }
-    },
-    [api] // dependencies
-  );
-
+  // Initial data fetch
   useEffect(() => {
     const fetchPopularMenus = async () => {
       try {
         setLoading(true);
         const data = await api.get<MenuItem[]>('/api/menu/popular?limit=10');
         setMenuItems(data);
-        await fetchComments(data);
+        await fetchAllComments(data);
       } catch (err) {
         console.error('Failed to fetch popular menus:', err);
       } finally {
@@ -372,13 +394,14 @@ export default function PopularDishes() {
     };
 
     fetchPopularMenus();
-  }, [api, fetchComments]);
+  }, [api, fetchAllComments]);
 
+  // Fetch user ratings when accessToken changes
   useEffect(() => {
     if (accessToken && menuItems.length > 0) {
       fetchUserRatings(menuItems);
     }
-  }, [accessToken, fetchUserRatings, menuItems, menuItems.length]);
+  }, [accessToken, menuItems.length]);
 
   const handleStarClick = (menuId: number, rating: number) => {
     if (!accessToken) {
@@ -437,7 +460,7 @@ export default function PopularDishes() {
       });
 
       setNewComment((prev) => ({ ...prev, [menuId]: '' }));
-      await fetchComments(menuItems);
+      await fetchCommentsForMenu(menuId);
     } catch (err) {
       console.error('Failed to post comment:', err);
       alert('Failed to post comment. Please try again.');
@@ -474,7 +497,7 @@ export default function PopularDishes() {
 
       setReplyingTo(null);
       setReplyText('');
-      await fetchComments(menuItems);
+      await fetchCommentsForMenu(replyingTo.menuId);
     } catch (err) {
       console.error('Failed to post reply:', err);
       alert('Failed to post reply. Please try again.');
@@ -595,7 +618,7 @@ export default function PopularDishes() {
                       <h3 className="text-lg font-medium text-card-foreground mb-4">
                         Comments ({comments[item.id]?.length || 0})
                       </h3>
-                      <div className="max-h-96 overflow-y-auto space-y-4 pr-2">
+                      <div className="max-h-[300px] overflow-y-auto space-y-4 pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
                         {comments[item.id]?.map((comment) => (
                           <CommentItem
                             key={comment._id}

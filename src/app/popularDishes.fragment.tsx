@@ -1,8 +1,9 @@
+/* eslint-disable no-unused-vars */
 'use client';
 
 import * as React from 'react';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FiX } from 'react-icons/fi';
 import { FaStar } from 'react-icons/fa';
 import { useApi } from '@/hooks/useApi';
@@ -280,72 +281,81 @@ export default function PopularDishes() {
   const api = useApi(accessToken ?? undefined);
 
   // Fetch user's ratings for all menu items
-  const fetchUserRatings = async (items: MenuItem[]) => {
-    if (!accessToken) return;
+  const fetchUserRatings = React.useCallback(
+    async (items: MenuItem[]) => {
+      if (!accessToken) return;
 
-    try {
-      const ratingsPromises = items.map(async (item) => {
-        try {
-          const data = await api.get<{
-            userRating?: number;
-            averageRating?: number;
-          }>(`/api/menuRatings?menuId=${item.id}`);
-          return { menuId: item.id, rating: data.userRating || 0 };
-        } catch (err) {
-          console.error(`Failed to fetch rating for menu ${item.id}:`, err);
-          return { menuId: item.id, rating: 0 };
-        }
-      });
-
-      const ratingsData = await Promise.all(ratingsPromises);
-
-      const ratingsMap = ratingsData.reduce(
-        (acc, { menuId, rating }) => {
-          if (rating > 0) {
-            acc[menuId] = rating;
+      try {
+        const ratingsPromises = items.map(async (item) => {
+          try {
+            const data = await api.get<{
+              userRating?: number;
+              averageRating?: number;
+            }>(`/api/menuRatings?menuId=${item.id}`);
+            return { menuId: item.id, rating: data.userRating || 0 };
+          } catch (err) {
+            console.error(`Failed to fetch rating for menu ${item.id}:`, err);
+            return { menuId: item.id, rating: 0 };
           }
-          return acc;
-        },
-        {} as Record<number, number>
-      );
+        });
 
-      setRatings(ratingsMap);
-    } catch (err) {
-      console.error('Failed to fetch user ratings:', err);
-    }
-  };
+        const ratingsData = await Promise.all(ratingsPromises);
+
+        const ratingsMap = ratingsData.reduce(
+          (acc, { menuId, rating }) => {
+            if (rating > 0) {
+              acc[menuId] = rating;
+            }
+            return acc;
+          },
+          {} as Record<number, number>
+        );
+
+        setRatings(ratingsMap);
+      } catch (err) {
+        console.error('Failed to fetch user ratings:', err);
+      }
+    },
+    [accessToken, api]
+  );
 
   // Fetch comments for menu items
-  const fetchComments = async (items: MenuItem[]) => {
-    try {
-      const commentsMap: Record<number, Comment[]> = {};
+  const fetchComments = useCallback(
+    async (items: MenuItem[]) => {
+      try {
+        const commentsMap: Record<number, Comment[]> = {};
 
-      await Promise.all(
-        items.map(async (item) => {
-          try {
-            const data = await api.get<Comment[]>(
-              `/api/menuComments?menuId=${item.id}`
-            );
+        await Promise.all(
+          items.map(async (item) => {
+            try {
+              const data = await api.get<Comment[]>(
+                `/api/menuComments?menuId=${item.id}`
+              );
 
-            const topLevelComments = data.filter((c) => !c.parentId);
-            const commentsWithReplies = topLevelComments.map((comment) => ({
-              ...comment,
-              replies: data.filter((c) => c.parentId === comment._id),
-            }));
+              const topLevelComments = data.filter((c) => !c.parentId);
+              const commentsWithReplies = topLevelComments.map((comment) => ({
+                ...comment,
+                replies: data.filter((c) => c.parentId === comment._id),
+              }));
 
-            commentsMap[item.id] = commentsWithReplies;
-          } catch (err) {
-            console.error(`Failed to fetch comments for menu ${item.id}:`, err);
-            commentsMap[item.id] = [];
-          }
-        })
-      );
+              commentsMap[item.id] = commentsWithReplies;
+            } catch (err) {
+              console.error(
+                `Failed to fetch comments for menu ${item.id}:`,
+                err
+              );
+              commentsMap[item.id] = [];
+            }
+          })
+        );
 
-      setComments(commentsMap);
-    } catch (err) {
-      console.error('Failed to fetch comments:', err);
-    }
-  };
+        setComments(commentsMap);
+      } catch (err) {
+        console.error('Failed to fetch comments:', err);
+      }
+    },
+    [api] // dependencies
+  );
 
   useEffect(() => {
     const fetchPopularMenus = async () => {
@@ -362,13 +372,13 @@ export default function PopularDishes() {
     };
 
     fetchPopularMenus();
-  }, []);
+  }, [api, fetchComments]);
 
   useEffect(() => {
     if (accessToken && menuItems.length > 0) {
       fetchUserRatings(menuItems);
     }
-  }, [accessToken, menuItems.length]);
+  }, [accessToken, fetchUserRatings, menuItems, menuItems.length]);
 
   const handleStarClick = (menuId: number, rating: number) => {
     if (!accessToken) {

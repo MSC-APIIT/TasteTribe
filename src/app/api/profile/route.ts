@@ -1,5 +1,3 @@
-export const runtime = 'nodejs';
-
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest } from '@/server/middleware/auth';
 import { ProfileService } from '@/server/modules/profile/service';

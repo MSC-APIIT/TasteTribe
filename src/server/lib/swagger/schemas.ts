@@ -1,5 +1,4 @@
 // Centralized schemas - define once, use everywhere
-//User
 export const schemas = {
   UserDto: {
     type: 'object',
@@ -82,67 +81,6 @@ export const schemas = {
     example: {
       accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
       refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-    },
-  },
-
-  //Profile
-  // ProfileDto: {
-  //   type: 'object',
-  //   properties: {
-  //     id: { type: 'string' },
-  //     bio: { type: 'string'},
-  //     image: { type: 'string' },
-  //   },
-  //   required: ['id', 'bio'],
-  //   example: {
-  //     id: '64a1b2c3d4e5f6789a012345',
-  //     bio: 'Food Lover',
-  //     image: '/logo.png',
-  //   },
-  // },
-
-  //stall
-  StallDto: {
-    type: 'object',
-    properties: {
-      id: { type: 'string' },
-      profileId: { type: 'string' },
-      stallName: { type: 'string' },
-      stallDescription: { type: 'string' },
-      stallImage: {
-        type: 'array',
-        items: { type: 'string' },
-      },
-    },
-    required: [
-      'id',
-      'profileId',
-      'stallName',
-      'stallDescription',
-    ],
-    example: {
-      id: '64d2d6115e6f61465c94a7f5',
-      profileId: '64a1b2c3d4e5f6789a012345',
-      stallName: 'Stall Name',
-      stallDescription: 'Stall Description!',
-      stallImage: ['/logo.png'],
-    },
-  },
-  StallCreateRequest: {
-    type: 'object',
-    properties: {
-      stallName: { type: 'string' },
-      stallDescription: { type: 'string' },
-      stallImage: {
-        type: 'array',
-        items: { type: 'string' },
-      },
-    },
-    required: ['stallName', 'stallDescription'],
-    example: {
-      stallName: 'Stall Name',
-      stallDescription: 'Stall Description!',
-      stallImage: ['/logo.png'],
     },
   },
 };

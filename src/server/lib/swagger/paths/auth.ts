@@ -1,7 +1,7 @@
 import { responses, requestBody } from '../schemas';
 
 export const authPaths = {
-  '/api/auth/register': {
+  '/auth/register': {
     post: {
       tags: ['Authentication'],
       summary: 'Register a new user',
@@ -13,7 +13,7 @@ export const authPaths = {
     },
   },
 
-  '/api/auth/login': {
+  '/auth/login': {
     post: {
       tags: ['Authentication'],
       summary: 'User login',
@@ -25,7 +25,7 @@ export const authPaths = {
     },
   },
 
-  '/api/auth/refresh': {
+  '/auth/refresh': {
     post: {
       tags: ['Authentication'],
       summary: 'Refresh access token',
@@ -38,16 +38,16 @@ export const authPaths = {
     },
   },
 
-  // '/pages/profile': {
-  //   get: {
-  //     tags: ['Authentication'],
-  //     summary: 'Get current user profile',
-  //     security: [{ bearerAuth: [] }],
-  //     responses: {
-  //       ...responses.success('ProfileDto', 'User profile retrieved'),
-  //       ...responses.common.unauthorized,
-  //       ...responses.common.notFound,
-  //     },
-  //   },
-  // },
+  '/auth/me': {
+    get: {
+      tags: ['Authentication'],
+      summary: 'Get current user profile',
+      security: [{ bearerAuth: [] }],
+      responses: {
+        ...responses.success('UserDto', 'User profile retrieved'),
+        ...responses.common.unauthorized,
+        ...responses.common.notFound,
+      },
+    },
+  },
 };

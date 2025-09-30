@@ -66,4 +66,15 @@ export const MenuRatingRepository = {
 
     return stats;
   },
+
+  getUserRating: async (
+    menuId: string,
+    userId: string
+  ): Promise<{ rating: number } | null> => {
+    await connectDb();
+    return MenuRatingModel.findOne({ menuId, userId })
+      .select('rating')
+      .lean<{ rating: number }>()
+      .exec();
+  },
 };

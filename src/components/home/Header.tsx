@@ -167,24 +167,15 @@ const Header = () => {
                         />
                         Profile
                       </Link>
-                      <Link
-                        href="/pages/stalls"
-                        className="block px-4 py-2 text-foreground hover:bg-muted transition duration-200"
-                        onClick={() => setIsDropdownOpen(false)}
-                      >
-                        <Icon
-                          icon="solar:shop-bold"
-                          className="inline-block mr-2"
-                        />
-                        Add Your Own Stall
-                      </Link>
                       <button
                         onClick={() => {
                           setIsDropdownOpen(false);
                           logout();
                           router.push('/');
                         }}
-                        className="w-full text-left px-4 py-2 text-destructive hover:bg-muted transition duration-200"
+                        className="w-full text-left px-4 py-2 flex items-center rounded-md 
+             bg-destructive text-destructive-foreground 
+             hover:bg-destructive/90 transition duration-200"
                       >
                         <Icon
                           icon="solar:logout-bold"

@@ -4,7 +4,6 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import React from 'react';
 import ThemeSwitch from '@/components/home/themeSwitch';
-import LeftDrawer from '@/components/home/LeftDrawer';
 import Header from '@/components/home/Header';
 import { Toaster } from 'react-hot-toast';
 import SessionModal from '@/components/Auth/SessionTimeout/SessionModal';
@@ -38,7 +37,7 @@ export default function RootLayout({
           >
             <Toaster position="top-right" />
             <ThemeSwitch className="fixed top-4 right-4 z-50" />
-            <LeftDrawer className="fixed top-4 left-4 z-50" />
+            {/* <LeftDrawer className="fixed top-4 left-4 z-50" /> */}
             <Header />
             <SessionModal />
             {children}

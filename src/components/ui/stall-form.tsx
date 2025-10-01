@@ -5,6 +5,8 @@ import { Input } from './input';
 import { Label } from './label';
 import { Button } from './button';
 import { Stall } from './stall-card';
+import { useAuth } from '@/hooks/userAuth';
+import toast from 'react-hot-toast';
 
 export function StallForm({
   onSubmit,
@@ -14,21 +16,27 @@ export function StallForm({
   onSubmit: (stall: Stall) => void;
   initialData?: Stall;
 }) {
-  const [name, setName] = useState(initialData?.name || '');
-  const [description, setDescription] = useState(
-    initialData?.description || ''
+  const [stallName, setstallName] = useState(initialData?.stallName || '');
+  const [stallDescription, setstallDescription] = useState(
+    initialData?.stallDescription || ''
   );
-  const [coverImages, setCoverImages] = useState<string[]>(
-    initialData?.coverImages || []
+  const [stallImage, setstallImage] = useState<string[]>(
+    initialData?.stallImage || []
   );
+  const { user } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!user) {
+      toast.error('User not authenticated');
+      return;
+    }
     onSubmit({
-      id: initialData?.id || Date.now().toString(),
-      name,
-      description,
-      coverImages,
+      profileId: user.id,
+      stallName,
+      stallDescription,
+      stallImage,
     });
   };
 
@@ -41,7 +49,7 @@ export function StallForm({
         reader.onload = (event) => {
           newImages.push(event.target?.result as string);
           if (newImages.length === files.length) {
-            setCoverImages(newImages);
+            setstallImage(newImages);
           }
         };
         reader.readAsDataURL(file);
@@ -55,8 +63,8 @@ export function StallForm({
         <Label htmlFor="stallName">Stall Name</Label>
         <Input
           id="stallName"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={stallName}
+          onChange={(e) => setstallName(e.target.value)}
           required
         />
       </div>
@@ -64,27 +72,27 @@ export function StallForm({
         <Label htmlFor="stallDescription">Description</Label>
         <Input
           id="stallDescription"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          value={stallDescription}
+          onChange={(e) => setstallDescription(e.target.value)}
           required
         />
       </div>
       <div>
-        <Label htmlFor="coverImages">Cover Images (up to 5)</Label>
+        <Label htmlFor="stallImage">Cover Images (up to 5)</Label>
         <Input
           type="file"
-          id="coverImages"
+          id="stallImage"
           accept="image/*"
           multiple
           onChange={handleCoverImageChange}
           className="mt-1 block w-full"
         />
         <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {coverImages.map((image, index) => (
+          {stallImage.map((image, index) => (
             <div key={index} className="relative h-32 w-full">
               <img
                 src={image}
-                alt={`Cover image ${index + 1}`}
+                alt={`stall image ${index + 1}`}
                 className="h-full w-full object-cover rounded-md"
               />
             </div>

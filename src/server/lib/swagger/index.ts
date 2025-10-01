@@ -1,6 +1,9 @@
 import { schemas } from './schemas';
 import { authPaths } from './paths/auth';
 import { stallPaths } from './paths/stall';
+import { profilePaths } from './paths/profile';
+import { menuPaths } from './paths/menu';
+import { menuRatingPaths } from './paths/menuRating';
 
 export const getSwaggerSpec = (baseUrl?: string) => {
   const getApiUrl = () => {
@@ -36,9 +39,9 @@ export const getSwaggerSpec = (baseUrl?: string) => {
     paths: {
       ...authPaths,
       ...stallPaths,
-      // Future modules just import and spread here:
-      // ...userPaths,
-      // ...productPaths,
+      ...profilePaths,
+      ...menuPaths,
+      ...menuRatingPaths,
     },
   };
 };

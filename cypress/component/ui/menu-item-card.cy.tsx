@@ -1,6 +1,7 @@
 import { MenuItemCard } from '../../../src/components/ui/menu-item-card'
 
 const mockMenuItem = {
+  _id: '1',
   id: '1',
   name: 'Margherita Pizza',
   description: 'Fresh tomatoes, mozzarella, and basil',
@@ -8,6 +9,7 @@ const mockMenuItem = {
 }
 
 const mockExpensiveItem = {
+  _id: '2',
   id: '2',
   name: 'Premium Wagyu Burger',
   description: 'Grade A5 wagyu beef with truffle mayo',
@@ -27,9 +29,9 @@ describe('Menu Item Card Component', () => {
       />
     )
     
-    cy.contains('Margherita Pizza').should('be.visible')
-    cy.contains('Fresh tomatoes, mozzarella, and basil').should('be.visible')
-    cy.contains('$12.99').should('be.visible')
+  cy.contains('Margherita Pizza').should('be.visible')
+  cy.contains('Fresh tomatoes, mozzarella, and basil').should('be.visible')
+  cy.contains(`LKR ${mockMenuItem.price}`).should('be.visible')
   })
 
   it('handles edit button click', () => {
@@ -75,8 +77,8 @@ describe('Menu Item Card Component', () => {
       </div>
     )
     
-    cy.contains('$12.99').should('be.visible')
-    cy.contains('$45.00').should('be.visible')
+  cy.contains('LKR 12.99').should('be.visible')
+  cy.contains('LKR 45.00').should('be.visible')
   })
 
   it('renders button variants correctly', () => {
@@ -104,7 +106,7 @@ describe('Menu Item Card Component', () => {
 
   it('handles very long menu item names and descriptions', () => {
     const longMenuItem = {
-      id: '3',
+      _id: '3',
       name: 'Super Extra Long Menu Item Name That Could Potentially Break Layout',
       description: 'An extremely detailed description of this menu item that goes on and on explaining every single ingredient and preparation method in great detail',
       price: 25.50
@@ -122,8 +124,8 @@ describe('Menu Item Card Component', () => {
     )
     
     cy.contains('Super Extra Long Menu Item Name').should('be.visible')
-    cy.contains('An extremely detailed description').should('be.visible')
-    cy.contains('$25.50').should('be.visible')
+  cy.contains('An extremely detailed description').should('be.visible')
+  cy.contains('LKR 25.50').should('be.visible')
   })
 
   it('renders multiple menu items in a list', () => {
@@ -135,7 +137,7 @@ describe('Menu Item Card Component', () => {
       <div className="space-y-4 p-4">
         {items.map(item => (
           <MenuItemCard 
-            key={item.id}
+            key={item._id}
             item={item} 
             onEdit={onEditSpy} 
             onDelete={onDeleteSpy} 

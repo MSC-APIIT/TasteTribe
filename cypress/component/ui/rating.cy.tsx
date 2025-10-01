@@ -162,9 +162,8 @@ describe('Rating Component', () => {
   it('has proper styling and accessibility', () => {
     cy.mount(<Rating rating={4} />)
     
-    // Check container has flex layout
-    cy.get('div').should('have.class', 'flex')
-    cy.get('div').should('have.class', 'items-center')
+  // Check container has flex layout
+  cy.get('[data-testid="rating"]').should('have.class', 'flex').and('have.class', 'items-center')
     
     // Check star sizing
     cy.get('svg').each(($star) => {

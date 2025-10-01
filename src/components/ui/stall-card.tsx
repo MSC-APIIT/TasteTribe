@@ -20,6 +20,7 @@ export function StallCard({
     <Card
       onClick={onClick}
       className="cursor-pointer hover:shadow-lg transition-shadow"
+      data-testid="stall-card"
     >
       <CardHeader>
         <CardTitle>{stall.stallName}</CardTitle>

@@ -45,13 +45,14 @@ describe('Logo Component', () => {
   })
 
   it('handles dark mode styling', () => {
-    cy.mount(
-      <div className="dark">
-        <SimpleLogo />
-      </div>
-    )
-    
-    cy.get('span').should('have.class', 'dark:text-white')
+    // Mount with dark mode enabled and assert computed color
+    cy.document().then((doc) => {
+      doc.documentElement.classList.add('dark');
+    });
+    cy.mount(<SimpleLogo />);
+    // Get the expected color for Tailwind dark:text-white
+    const expectedDarkColor = 'rgb(255, 255, 255)';
+    cy.get('span').should('have.css', 'color', expectedDarkColor);
   })
 
   it('handles light mode styling', () => {

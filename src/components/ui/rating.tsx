@@ -10,7 +10,7 @@ export function Rating({
   maxRating?: number;
 }) {
   return (
-    <div className="flex items-center">
+    <div className="flex items-center" data-testid="rating">
       {[...Array(maxRating)].map((_, i) => (
         <Star
           key={i}

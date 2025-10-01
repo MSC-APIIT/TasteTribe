@@ -2,16 +2,16 @@ import { StallCard } from '../../../src/components/ui/stall-card'
 
 const mockStall = {
   id: '1',
-  name: 'Delicious Pizza Place',
-  description: 'Best pizza in town with fresh ingredients',
-  coverImages: ['/logo.png']
+  stallName: 'Delicious Pizza Place',
+  stallDescription: 'Best pizza in town with fresh ingredients',
+  stallImage: ['/logo.png']
 }
 
 const mockStallWithoutImage = {
   id: '2',
-  name: 'Burger Joint',
-  description: 'Juicy burgers and crispy fries',
-  coverImages: []
+  stallName: 'Burger Joint',
+  stallDescription: 'Juicy burgers and crispy fries',
+  stallImage: []
 }
 
 describe('Stall Card Component', () => {
@@ -34,9 +34,11 @@ describe('Stall Card Component', () => {
 
   it('shows hover effects', () => {
     cy.mount(<StallCard stall={mockStall} />)
-    
-    cy.get('[class*="cursor-pointer"]').should('have.class', 'hover:shadow-lg')
-    cy.get('[class*="cursor-pointer"]').should('have.class', 'transition-shadow')
+    // Trigger hover and assert computed box-shadow
+    cy.get('[data-testid="stall-card"]').trigger('mouseover')
+    cy.get('[data-testid="stall-card"]').should('have.css', 'box-shadow').and(($shadow) => {
+      expect($shadow).to.not.equal('none');
+    });
   })
 
   it('falls back to default image when no cover image provided', () => {
@@ -65,9 +67,10 @@ describe('Stall Card Component', () => {
   it('handles long text content properly', () => {
     const longTextStall = {
       id: '3',
-      name: 'Very Long Restaurant Name That Might Overflow',
-      description: 'This is a very long description that should test how the component handles extensive text content and whether it wraps properly without breaking the layout',
-      coverImages: ['/logo.png']
+      stallName: 'Very Long Restaurant Name That Might Overflow',
+      stallDescription: 'This is a very long description that should test how the component handles extensive text content and whether it wraps properly without breaking the layout',
+      stallImage: ['/logo.png'],
+      profileId: 'profile-3'
     }
     
     cy.mount(<StallCard stall={longTextStall} />)

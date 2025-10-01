@@ -16,9 +16,7 @@ describe('Card Component', () => {
         </CardContent>
       </Card>
     )
-    
-    cy.get('div').should('have.class', 'rounded-lg')
-    cy.get('div').should('have.class', 'border')
+    cy.get('[data-testid="card-root"]').should('have.class', 'rounded-lg').and('have.class', 'border')
     cy.contains('Basic card content').should('be.visible')
   })
 

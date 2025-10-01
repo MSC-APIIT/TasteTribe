@@ -61,7 +61,7 @@ const SimpleSignIn = ({ onSuccess }: { onSuccess?: () => void }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
-            className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-hidden transition focus:border-primary focus-visible:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-none transition focus:border-primary focus-visible:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
         <div className="mb-[22px]">
@@ -71,7 +71,7 @@ const SimpleSignIn = ({ onSuccess }: { onSuccess?: () => void }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
-            className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-hidden transition focus:border-primary focus-visible:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-md border border-solid bg-transparent px-5 py-3 text-base text-dark outline-none transition focus:border-primary focus-visible:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
         {error && <p className="text-red-500 mb-4 text-center">{error}</p>}

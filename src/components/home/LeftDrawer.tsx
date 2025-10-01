@@ -58,11 +58,11 @@ const LeftDrawer: React.FC<LeftDrawerProps> = ({ className }) => {
       onClick={toggleDrawer(false)}
     >
       <List>
-        {['Home', 'Menus'].map((text) => (
+        {['Home'].map((text) => (
           <ListItem key={text} disablePadding>
             <ListItemButton
               sx={drawerStyles.listItem}
-              onClick={() => navigate(`/${text.toLowerCase()}`)}
+              onClick={() => navigate('/')}
             >
               <ListItemText primary={text} />
             </ListItemButton>
@@ -73,7 +73,10 @@ const LeftDrawer: React.FC<LeftDrawerProps> = ({ className }) => {
       <List>
         {['Profile', 'Settings', 'Help'].map((text) => (
           <ListItem key={text} disablePadding>
-            <ListItemButton sx={drawerStyles.listItem}>
+            <ListItemButton
+              sx={drawerStyles.listItem}
+              onClick={() => navigate(`/pages/${text.toLowerCase()}`)}
+            >
               <ListItemText primary={text} />
             </ListItemButton>
           </ListItem>

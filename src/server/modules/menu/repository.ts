@@ -61,4 +61,10 @@ export const MenuRepository = {
       name: { $regex: searchTerm, $options: 'i' },
     }).lean();
   },
+
+  findByStallIds: async (stallIds: string[]) => {
+    await connectDb();
+    if (!stallIds?.length) return [];
+    return MenuModel.find({ stallId: { $in: stallIds } }).lean();
+  },
 };

@@ -132,31 +132,32 @@ export const MenuService = {
     // 1) Search menus by name
     const matchingMenus = await MenuRepository.searchByName(searchTerm);
 
-    if (!matchingMenus?.length) {
+    // 2) Search stalls by name and get their menus
+    const matchingStalls = await StallRepository.searchByName(searchTerm);
+    const matchingStallIds = matchingStalls.map((s: any) => String(s._id));
+    const menusFromStalls =
+      matchingStallIds.length > 0
+        ? await MenuRepository.findByStallIds(matchingStallIds)
+        : [];
+
+    // 3) Combine and deduplicate menus
+    const allMatchingMenus = [...matchingMenus, ...menusFromStalls];
+    const uniqueMenus = Array.from(
+      new Map(allMatchingMenus.map((m: any) => [String(m._id), m])).values()
+    );
+
+    if (!uniqueMenus?.length) {
       return [];
     }
 
-    // 2) Get all stalls to search by stall name
+    // 4) Get all stalls
     const stallIds = Array.from(
-      new Set(matchingMenus.map((m: any) => String(m.stallId)))
+      new Set(uniqueMenus.map((m: any) => String(m.stallId)))
     );
-
     const stalls = await StallRepository.findByIds(stallIds);
 
-    // Filter menus by either menu name or stall name match
-    const filteredMenus = matchingMenus.filter((menu: any) => {
-      const menuNameMatch = menu.name.toLowerCase().includes(searchTerm);
-      const stall = stalls.find(
-        (s: any) => String(s._id) === String(menu.stallId)
-      );
-      const stallNameMatch = stall?.stallName
-        ?.toLowerCase()
-        .includes(searchTerm);
-      return menuNameMatch || stallNameMatch;
-    });
-
-    // Limit results
-    const limitedMenus = filteredMenus.slice(0, limit);
+    // 5) Limit results
+    const limitedMenus = uniqueMenus.slice(0, limit);
 
     if (!limitedMenus.length) {
       return [];
@@ -164,13 +165,13 @@ export const MenuService = {
 
     const menuIds = limitedMenus.map((m: any) => String(m._id));
 
-    // 3) Get rating stats for these menus
+    // 6) Get rating stats for these menus
     const stats = await MenuRatingRepository.getMenuStats(menuIds);
 
     // Create stall map
     const stallMap = new Map(stalls.map((s: any) => [String(s._id), s]));
 
-    // 4) Calculate overall rating for each stall
+    // 7) Calculate overall rating for each stall
     const stallRatings = new Map<string, { total: number; count: number }>();
 
     for (const menu of limitedMenus) {
@@ -189,10 +190,10 @@ export const MenuService = {
       }
     }
 
-    // 5) Fetch comments
+    // 8) Fetch comments
     const commentsByMenu = await MenuCommentRepository.findByMenuIds(menuIds);
 
-    // 6) Format results (same structure as getPopularMenus)
+    // 9) Format results (same structure as getPopularMenus)
     const result = limitedMenus.map((menu: any) => {
       const stat = stats.find((s: any) => String(s._id) === String(menu._id));
       const stall = stallMap.get(String(menu.stallId));

@@ -48,7 +48,7 @@ export function MenuItemCard({
             {item.description}
           </p>
           <div className="mt-2 flex justify-between items-center">
-            <span className="font-bold text-primary">${item.price}</span>
+            <span className="font-bold text-primary">LKR {item.price}</span>
             <div className="space-x-2">
               {onEdit && (
                 <button

@@ -54,4 +54,17 @@ export const MenuRepository = {
     const map = new Map(docs.map((d: any) => [String(d._id), d]));
     return ids.map((id) => map.get(id)).filter(Boolean);
   },
+
+  searchByName: async (searchTerm: string) => {
+    await connectDb();
+    return await MenuModel.find({
+      name: { $regex: searchTerm, $options: 'i' },
+    }).lean();
+  },
+
+  findByStallIds: async (stallIds: string[]) => {
+    await connectDb();
+    if (!stallIds?.length) return [];
+    return MenuModel.find({ stallId: { $in: stallIds } }).lean();
+  },
 };

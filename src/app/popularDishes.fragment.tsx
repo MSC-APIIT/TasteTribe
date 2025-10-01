@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 'use client';
 
@@ -287,7 +286,11 @@ function CommentItem({
   );
 }
 
-export default function PopularDishes() {
+interface PopularDishesProps {
+  searchQuery?: string;
+}
+
+export default function PopularDishes({ searchQuery }: PopularDishesProps) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [ratings, setRatings] = useState<Record<number, number>>({});
   const [comments, setComments] = useState<Record<number, Comment[]>>({});
@@ -303,6 +306,9 @@ export default function PopularDishes() {
   const [submittingComment, setSubmittingComment] = useState<
     Record<number, boolean>
   >({});
+  const [selectedImages, setSelectedImages] = useState<Record<number, number>>(
+    {}
+  );
 
   const { accessToken } = useAuth();
   const api = useApi(accessToken ?? undefined);
@@ -315,7 +321,6 @@ export default function PopularDishes() {
           `/api/menuComments?menuId=${menuId}`
         );
 
-        // API already returns comments with nested replies, so just use it directly
         setComments((prev) => ({
           ...prev,
           [menuId]: data,
@@ -383,7 +388,9 @@ export default function PopularDishes() {
     const fetchPopularMenus = async () => {
       try {
         setLoading(true);
-        const data = await api.get<MenuItem[]>('/api/menu/popular?limit=10');
+        const data = await api.get<MenuItem[]>(
+          `/api/menu/popular?limit=10${searchQuery ? `&query=${encodeURIComponent(searchQuery)}` : ''}`
+        );
         setMenuItems(data);
         await fetchAllComments(data);
       } catch (err) {
@@ -394,14 +401,13 @@ export default function PopularDishes() {
     };
 
     fetchPopularMenus();
-  }, [api, fetchAllComments]);
+  }, [api, fetchAllComments, searchQuery]);
 
-  // Fetch user ratings when accessToken changes
   useEffect(() => {
     if (accessToken && menuItems.length > 0) {
       fetchUserRatings(menuItems);
     }
-  }, [accessToken, menuItems.length]);
+  }, [accessToken, fetchUserRatings, menuItems, menuItems.length]);
 
   const handleStarClick = (menuId: number, rating: number) => {
     if (!accessToken) {
@@ -516,12 +522,25 @@ export default function PopularDishes() {
       <section className="bg-gray-50/50 dark:bg-slate-800/50 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Popular Dishes
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Browse and rate the most popular dishes from local food stalls
-            </p>
+            {!searchQuery ? (
+              <>
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                  Popular Dishes
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Browse and rate the most popular dishes from local food stalls
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                  Search Results
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Browse and rate the most popular dishes from local food stalls
+                </p>
+              </>
+            )}
           </div>
 
           <div className="space-y-8">
@@ -538,10 +557,11 @@ export default function PopularDishes() {
                   className="bg-card rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 border border-border"
                 >
                   <div className="relative">
-                    <div className="relative w-full h-64 bg-muted rounded-lg overflow-hidden">
+                    {/* Main Image */}
+                    <div className="relative w-full h-64 bg-muted rounded-lg overflow-hidden mb-2">
                       {item.images && item.images.length > 0 ? (
                         <Image
-                          src={item.images[0]}
+                          src={item.images[selectedImages[item.id] || 0]}
                           alt={item.name}
                           layout="fill"
                           objectFit="cover"
@@ -552,6 +572,35 @@ export default function PopularDishes() {
                         </div>
                       )}
                     </div>
+
+                    {/* Thumbnail Grid - 2 columns */}
+                    {item.images && item.images.length > 1 && (
+                      <div className="grid grid-cols-2 gap-2">
+                        {item.images.slice(0, 5).map((image, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() =>
+                              setSelectedImages((prev) => ({
+                                ...prev,
+                                [item.id]: idx,
+                              }))
+                            }
+                            className={`relative h-24 bg-muted rounded-lg overflow-hidden cursor-pointer transition-all duration-200 ${
+                              (selectedImages[item.id] || 0) === idx
+                                ? 'ring-2 ring-orange-500 scale-95'
+                                : 'hover:ring-2 hover:ring-orange-300 opacity-70 hover:opacity-100'
+                            }`}
+                          >
+                            <Image
+                              src={image}
+                              alt={`${item.name} ${idx + 1}`}
+                              layout="fill"
+                              objectFit="cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div>

@@ -77,4 +77,22 @@ export const MenuRatingRepository = {
       .lean<{ rating: number }>()
       .exec();
   },
+
+  getMenuStats: async (menuIds: string[]) => {
+    await connectDb();
+    return await MenuRatingModel.aggregate([
+      {
+        $match: {
+          menuId: { $in: menuIds.map((id) => new mongoose.Types.ObjectId(id)) },
+        },
+      },
+      {
+        $group: {
+          _id: '$menuId',
+          averageRating: { $avg: '$rating' },
+          ratingCount: { $sum: 1 },
+        },
+      },
+    ]);
+  },
 };

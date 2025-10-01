@@ -114,12 +114,7 @@ export const schemas = {
         items: { type: 'string' },
       },
     },
-    required: [
-      'id',
-      'profileId',
-      'stallName',
-      'stallDescription',
-    ],
+    required: ['id', 'profileId', 'stallName', 'stallDescription'],
     example: {
       id: '64d2d6115e6f61465c94a7f5',
       profileId: '64a1b2c3d4e5f6789a012345',
@@ -143,6 +138,231 @@ export const schemas = {
       stallName: 'Stall Name',
       stallDescription: 'Stall Description!',
       stallImage: ['/logo.png'],
+    },
+  },
+  ProfileDto: {
+    type: 'object',
+    properties: {
+      userId: { type: 'string' },
+      bio: { type: 'string' },
+      profileImage: { type: 'string' },
+      createdAt: { type: 'string', format: 'date-time' },
+      updatedAt: { type: 'string', format: 'date-time' },
+    },
+    required: ['userId'],
+    example: {
+      userId: '64a1b2c3d4e5f6789a012345',
+      bio: 'Food enthusiast and stall owner',
+      profileImage: '/profile/user123.jpg',
+      createdAt: '2024-01-15T10:30:00.000Z',
+      updatedAt: '2024-01-15T10:30:00.000Z',
+    },
+  },
+
+  ProfileWithNameDto: {
+    type: 'object',
+    properties: {
+      profile: { $ref: '#/components/schemas/ProfileDto' },
+      name: { type: 'string' },
+    },
+    required: ['profile', 'name'],
+    example: {
+      profile: {
+        userId: '64a1b2c3d4e5f6789a012345',
+        bio: 'Food enthusiast and stall owner',
+        profileImage: '/profile/user123.jpg',
+        createdAt: '2024-01-15T10:30:00.000Z',
+        updatedAt: '2024-01-15T10:30:00.000Z',
+      },
+      name: 'John Doe',
+    },
+  },
+
+  ProfileCreateRequest: {
+    type: 'object',
+    properties: {
+      bio: { type: 'string' },
+      profileImage: { type: 'string' },
+    },
+    example: {
+      bio: 'Food enthusiast and stall owner',
+      profileImage: '/profile/user123.jpg',
+    },
+  },
+
+  ProfileUpdateRequest: {
+    type: 'object',
+    properties: {
+      bio: { type: 'string' },
+      profileImage: { type: 'string' },
+    },
+    example: {
+      bio: 'Updated bio - Passionate food lover',
+      profileImage: '/profile/user123-new.jpg',
+    },
+  },
+
+  UpdateNameRequest: {
+    type: 'object',
+    properties: {
+      name: { type: 'string' },
+    },
+    required: ['name'],
+    example: {
+      name: 'Jane Doe',
+    },
+  },
+
+  //Menu
+  MenuItemDto: {
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      stallId: { type: 'string' },
+      name: { type: 'string' },
+      description: { type: 'string' },
+      price: { type: 'number' },
+      images: {
+        type: 'array',
+        items: { type: 'string' },
+      },
+      createdAt: { type: 'string', format: 'date-time' },
+      updatedAt: { type: 'string', format: 'date-time' },
+    },
+    required: ['id', 'stallId', 'name', 'price'],
+    example: {
+      id: '64d2d6115e6f61465c94a7f5',
+      stallId: '64a1b2c3d4e5f6789a012345',
+      name: 'Kottu Roti',
+      description: 'Spicy chicken kottu with vegetables',
+      price: 450.0,
+      images: ['/menu/kottu.jpg'],
+      createdAt: '2024-01-15T10:30:00.000Z',
+      updatedAt: '2024-01-15T10:30:00.000Z',
+    },
+  },
+
+  MenuCreateRequest: {
+    type: 'object',
+    properties: {
+      stallId: { type: 'string' },
+      name: { type: 'string' },
+      description: { type: 'string' },
+      price: { type: 'number' },
+      images: {
+        type: 'array',
+        items: { type: 'string' },
+      },
+    },
+    required: ['stallId', 'name', 'price'],
+    example: {
+      stallId: '64a1b2c3d4e5f6789a012345',
+      name: 'Kottu Roti',
+      description: 'Spicy chicken kottu with vegetables',
+      price: 450.0,
+      images: ['/menu/kottu.jpg'],
+    },
+  },
+
+  MenuUpdateRequest: {
+    type: 'object',
+    properties: {
+      name: { type: 'string' },
+      description: { type: 'string' },
+      price: { type: 'number' },
+      images: {
+        type: 'array',
+        items: { type: 'string' },
+      },
+    },
+    example: {
+      name: 'Kottu Roti Special',
+      description: 'Extra spicy chicken kottu with cheese',
+      price: 500.0,
+      images: ['/menu/kottu-special.jpg'],
+    },
+  },
+
+  PopularMenuDto: {
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      name: { type: 'string' },
+      images: {
+        type: 'array',
+        items: { type: 'string' },
+      },
+      description: { type: 'string' },
+      price: { type: 'string' },
+      averageRating: { type: 'number' },
+      ratingCount: { type: 'number' },
+      stallName: { type: 'string' },
+      stallOverallRating: { type: 'number' },
+      comments: {
+        type: 'array',
+        items: { type: 'object' },
+      },
+    },
+    example: {
+      id: '64d2d6115e6f61465c94a7f5',
+      name: 'Kottu Roti',
+      images: ['/menu/kottu.jpg'],
+      description: 'Spicy chicken kottu with vegetables',
+      price: 'LKR 450.00',
+      averageRating: 4.5,
+      ratingCount: 25,
+      stallName: 'Ceylon Kottu House',
+      stallOverallRating: 4.3,
+      comments: [],
+    },
+  },
+
+  //Menu Ratings
+  MenuRatingDto: {
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      menuId: { type: 'string' },
+      userId: { type: 'string' },
+      rating: { type: 'number', minimum: 1, maximum: 5 },
+      createdAt: { type: 'string', format: 'date-time' },
+      updatedAt: { type: 'string', format: 'date-time' },
+    },
+    required: ['id', 'menuId', 'userId', 'rating'],
+    example: {
+      id: '64d2d6115e6f61465c94a7f5',
+      menuId: '64a1b2c3d4e5f6789a012345',
+      userId: '64b3c4d5e6f7a8901234567b',
+      rating: 5,
+      createdAt: '2024-01-15T10:30:00.000Z',
+      updatedAt: '2024-01-15T10:30:00.000Z',
+    },
+  },
+
+  MenuRatingRequest: {
+    type: 'object',
+    properties: {
+      menuId: { type: 'string' },
+      rating: { type: 'number', minimum: 1, maximum: 5 },
+    },
+    required: ['menuId', 'rating'],
+    example: {
+      menuId: '64a1b2c3d4e5f6789a012345',
+      rating: 5,
+    },
+  },
+
+  MenuRatingStatsDto: {
+    type: 'object',
+    properties: {
+      averageRating: { type: 'number' },
+      ratingCount: { type: 'number' },
+      userRating: { type: 'number', nullable: true },
+    },
+    example: {
+      averageRating: 4.5,
+      ratingCount: 25,
+      userRating: 5,
     },
   },
 };

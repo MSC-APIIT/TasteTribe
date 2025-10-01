@@ -16,11 +16,28 @@ interface StallProfilePageProps {
   stallId: string;
 }
 
-// Skeleton components for consistent loading states
+interface ApiComment {
+  _id: string;
+  menuId: string;
+  userId: string;
+  userName: string;
+  text: string;
+  parentId?: string;
+  createdAt: string;
+  replies?: ApiComment[];
+}
+
+interface MenuRating {
+  userRating?: number;
+  averageRating: number;
+  totalRatings: number;
+  ratingCount: number;
+}
+
+// Skeleton components
 const StallHeaderSkeleton = () => (
   <div className="bg-card/80 backdrop-blur-sm border border-border rounded-xl p-8 shadow-lg animate-pulse">
     <div className="flex flex-col lg:flex-row gap-8">
-      {/* Cover Images Skeleton */}
       <div className="flex-shrink-0">
         <div className="grid grid-cols-2 gap-3 w-full lg:w-80">
           {Array.from({ length: 4 }).map((_, index) => (
@@ -31,8 +48,6 @@ const StallHeaderSkeleton = () => (
           ))}
         </div>
       </div>
-
-      {/* Stall Info Skeleton */}
       <div className="flex-grow space-y-4">
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
           <div className="w-full">
@@ -42,8 +57,6 @@ const StallHeaderSkeleton = () => (
           </div>
           <div className="h-10 w-28 bg-gray-200/50 dark:bg-gray-800/50 rounded flex-shrink-0" />
         </div>
-
-        {/* Stats Skeleton */}
         <div className="flex flex-wrap gap-6 pt-4 border-t border-border">
           {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="text-center">
@@ -66,6 +79,22 @@ const MenuItemSkeleton = () => (
   </div>
 );
 
+const CommentSkeleton = () => (
+  <div className="bg-card border border-border rounded-lg p-6 animate-pulse">
+    <div className="flex items-start gap-4 mb-4">
+      <div className="w-12 h-12 bg-gray-200/50 dark:bg-gray-800/50 rounded-full" />
+      <div className="flex-1">
+        <div className="h-5 bg-gray-200/50 dark:bg-gray-800/50 rounded w-1/4 mb-2" />
+        <div className="h-4 bg-gray-200/50 dark:bg-gray-800/50 rounded w-1/3" />
+      </div>
+    </div>
+    <div className="space-y-2">
+      <div className="h-4 bg-gray-200/50 dark:bg-gray-800/50 rounded w-full" />
+      <div className="h-4 bg-gray-200/50 dark:bg-gray-800/50 rounded w-5/6" />
+    </div>
+  </div>
+);
+
 export default function StallProfilePage({ stallId }: StallProfilePageProps) {
   const { accessToken } = useAuth();
   const api = useApi(accessToken ?? undefined);
@@ -74,31 +103,12 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
   const [isLoadingStall, setIsLoadingStall] = useState(true);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoadingMenu, setIsLoadingMenu] = useState(true);
-
-  // eslint-disable-next-line no-unused-vars
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: '1',
-      author: 'Sarah Johnson',
-      comment:
-        'Outstanding food quality and presentation. The truffle fries are absolutely divine!',
-      rating: 5,
-    },
-    {
-      id: '2',
-      author: 'Michael Chen',
-      comment:
-        'Great atmosphere and friendly service. The burger exceeded my expectations.',
-      rating: 4,
-    },
-    {
-      id: '3',
-      author: 'Emma Wilson',
-      comment:
-        'Fresh ingredients and authentic flavors. Will definitely return!',
-      rating: 5,
-    },
-  ]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [isLoadingComments, setIsLoadingComments] = useState(true);
+  const [stallRatings, setStallRatings] = useState<{
+    averageRating: number;
+    totalReviews: number;
+  }>({ averageRating: 0, totalReviews: 0 });
 
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
   const [isStallModalOpen, setIsStallModalOpen] = useState(false);
@@ -106,13 +116,10 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
     undefined
   );
 
-  // Fetch stall data - Fixed to avoid multiple calls
+  // Fetch stall data
   useEffect(() => {
     const fetchStall = async () => {
-      // Only proceed if we have accessToken and stallId
-      if (!accessToken || !stallId) {
-        return;
-      }
+      if (!accessToken || !stallId) return;
 
       try {
         setIsLoadingStall(true);
@@ -130,6 +137,7 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, stallId]);
 
+  // Fetch menu items
   useEffect(() => {
     const fetchMenuItems = async () => {
       if (!accessToken || !stallId) {
@@ -153,6 +161,93 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, stallId]);
 
+  // Fetch comments and ratings for all menu items
+  useEffect(() => {
+    const fetchCommentsAndRatings = async () => {
+      if (!menuItems.length) {
+        setIsLoadingComments(false);
+        return;
+      }
+
+      try {
+        setIsLoadingComments(true);
+
+        const commentsPromises = menuItems.map((item) => {
+          const menuId = item._id || item.id;
+          return api
+            .get<ApiComment[]>(`/api/menuComments?menuId=${menuId}`)
+            .catch((err) => {
+              console.error(
+                `Failed to fetch comments for menu ${menuId}:`,
+                err
+              );
+              return [] as ApiComment[];
+            });
+        });
+
+        const ratingsPromises = menuItems.map((item) => {
+          const menuId = item._id || item.id;
+          return api
+            .get<MenuRating>(`/api/menuRatings?menuId=${menuId}`)
+            .catch((err) => {
+              console.error(`Failed to fetch ratings for menu ${menuId}:`, err);
+              return {
+                averageRating: 0,
+                ratingCount: 0,
+                userRating: 0,
+              };
+            });
+        });
+
+        const [commentsResults, ratingsResults] = await Promise.all([
+          Promise.all(commentsPromises),
+          Promise.all(ratingsPromises),
+        ]);
+
+        // Transform API comments to UI format
+        const allComments: Comment[] = [];
+        commentsResults.forEach((menuComments, index) => {
+          const topLevelComments = menuComments.filter((c) => !c.parentId);
+
+          topLevelComments.forEach((apiComment) => {
+            allComments.push({
+              id: apiComment._id,
+              author: apiComment.userName,
+              comment: apiComment.text,
+              rating: ratingsResults[index]?.averageRating || 0,
+            });
+          });
+        });
+
+        setComments(allComments);
+
+        // Calculate stall-wide ratings using correct property names
+        const totalRatings = ratingsResults.reduce(
+          (sum, rating) => sum + (rating?.ratingCount || 0),
+          0
+        );
+        const weightedSum = ratingsResults.reduce(
+          (sum, rating) =>
+            sum + (rating?.averageRating || 0) * (rating?.ratingCount || 0),
+          0
+        );
+        const averageRating = totalRatings > 0 ? weightedSum / totalRatings : 0;
+
+        setStallRatings({
+          averageRating,
+          totalReviews: totalRatings,
+        });
+      } catch (err) {
+        console.error('Failed to fetch comments and ratings:', err);
+        toast.error('Failed to load reviews');
+      } finally {
+        setIsLoadingComments(false);
+      }
+    };
+
+    fetchCommentsAndRatings();
+  }, [menuItems, api]);
+
   const handleAddItem = async (item: MenuItem, images?: File[]) => {
     try {
       const formData = new FormData();
@@ -166,7 +261,6 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
       }
 
       const newItem = await api.post<MenuItem>('/api/menu', formData);
-
       setMenuItems((prevItems) => [...prevItems, newItem]);
       setIsMenuModalOpen(false);
       toast.success('Menu item added successfully!');
@@ -190,7 +284,6 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
       }
 
       const updatedItem = await api.put<MenuItem>('/api/menu', formData);
-
       setMenuItems((prevItems) =>
         prevItems.map((i) => {
           const currentItemId = i._id || i.id;
@@ -198,7 +291,6 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
           return currentItemId === targetItemId ? updatedItem : i;
         })
       );
-
       setIsMenuModalOpen(false);
       setEditingItem(undefined);
       toast.success('Menu item updated successfully!');
@@ -223,8 +315,6 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
   const handleDeleteItem = async (id: string) => {
     try {
       await api.delete(`/api/menu?menuId=${id}`);
-
-      // Use functional update for consistent state management
       await fetchMenuItems();
       toast.success('Menu item deleted successfully!');
     } catch (err: any) {
@@ -247,10 +337,6 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
       toast.error(error.message || 'Failed to update stall');
     }
   };
-
-  const averageRating =
-    comments.reduce((acc, comment) => acc + comment.rating, 0) /
-    comments.length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -280,7 +366,6 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
                           />
                         </div>
                       ))}
-                      {/* Placeholder for additional images */}
                       {stall?.stallImage &&
                         Array.from({
                           length: Math.max(0, 4 - stall.stallImage.length),
@@ -334,7 +419,11 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-primary">
-                          {comments.length}
+                          {isLoadingComments ? (
+                            <div className="h-8 w-8 bg-gray-200/50 dark:bg-gray-800/50 rounded animate-pulse" />
+                          ) : (
+                            stallRatings.totalReviews
+                          )}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Reviews
@@ -342,7 +431,11 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-primary">
-                          {averageRating.toFixed(1)}★
+                          {isLoadingComments ? (
+                            <div className="h-8 w-8 bg-gray-200/50 dark:bg-gray-800/50 rounded animate-pulse" />
+                          ) : (
+                            `${stallRatings.averageRating.toFixed(1)} ★`
+                          )}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Average Rating
@@ -375,14 +468,12 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
 
             {isLoadingMenu ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {/* Loading skeletons */}
                 {Array.from({ length: 6 }).map((_, index) => (
                   <MenuItemSkeleton key={index} />
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {/* Existing Menu Items */}
                 {menuItems.map((item) => (
                   <MenuItemCard
                     key={item.id}
@@ -394,7 +485,6 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
                     onDelete={() => handleDeleteItem(item._id!)}
                   />
                 ))}
-                {/* Add New Item Card */}
                 <div
                   onClick={() => {
                     if (isLoadingStall || !accessToken) return;
@@ -456,20 +546,28 @@ export default function StallProfilePage({ stallId }: StallProfilePageProps) {
                 Customer Reviews
               </h2>
               <p className="text-muted-foreground mt-1">
-                What our customers are saying
+                What our customers are saying about all our dishes
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {comments.map((comment) => (
-                <CommentCard key={comment.id} comment={comment} />
-              ))}
-            </div>
+            {isLoadingComments ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <CommentSkeleton key={index} />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {comments.map((comment) => (
+                  <CommentCard key={comment.id} comment={comment} />
+                ))}
+              </div>
+            )}
 
-            {comments.length === 0 && (
+            {!isLoadingComments && comments.length === 0 && (
               <div className="text-center py-12">
                 <div className="text-muted-foreground text-lg">
-                  No reviews yet
+                  No reviews yet!
                 </div>
               </div>
             )}

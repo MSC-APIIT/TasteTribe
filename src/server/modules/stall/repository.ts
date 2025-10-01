@@ -69,4 +69,11 @@ export const StallRepository = {
     const map = new Map(docs.map((d: any) => [String(d._id), d]));
     return ids.map((id) => map.get(id)).filter(Boolean);
   },
+
+  searchByName: async (searchTerm: string) => {
+    await connectDb();
+    return await StallModel.find({
+      stallName: { $regex: searchTerm, $options: 'i' },
+    }).lean();
+  },
 };

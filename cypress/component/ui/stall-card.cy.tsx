@@ -4,14 +4,16 @@ const mockStall = {
   id: '1',
   stallName: 'Delicious Pizza Place',
   stallDescription: 'Best pizza in town with fresh ingredients',
-  stallImage: ['/logo.png']
+  stallImage: ['/logo.png'],
+  profileId: 'profile-1'
 }
 
 const mockStallWithoutImage = {
   id: '2',
   stallName: 'Burger Joint',
   stallDescription: 'Juicy burgers and crispy fries',
-  stallImage: []
+  stallImage: [],
+  profileId: 'profile-2'
 }
 
 describe('Stall Card Component', () => {

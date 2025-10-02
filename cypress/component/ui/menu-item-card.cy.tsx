@@ -106,7 +106,7 @@ describe('Menu Item Card Component', () => {
 
   it('handles very long menu item names and descriptions', () => {
     const longMenuItem = {
-      _id: '3',
+      id: '3',
       name: 'Super Extra Long Menu Item Name That Could Potentially Break Layout',
       description: 'An extremely detailed description of this menu item that goes on and on explaining every single ingredient and preparation method in great detail',
       price: 25.50

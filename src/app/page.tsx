@@ -74,7 +74,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+      test string
       {/* Popular Dishes Section */}
       <PopularDishes searchQuery={searchTerm || undefined} />
     </>

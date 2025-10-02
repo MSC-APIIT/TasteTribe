@@ -2,43 +2,44 @@ name: Test Automation
 
 on:
   push:
-    branches: [dev]
+    branches: [dev, test-ci]
   pull_request:
-    branches: [dev]
+    branches: [dev, test-ci]
   workflow_dispatch:
 
 jobs:
-  cypress-run:
+  test:
+    name: Run Component Tests
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
+
       - name: Install dependencies
         run: npm ci
-      - name: Build project
-        run: npm run build
-      - name: Start server
-        run: npm run start &
-        env:
-          PORT: 3000
-      - name: Wait for server to be ready
-        run: npx wait-on http://localhost:3000
-      - name: Run Cypress tests
-        run: npx cypress run
+
+      - name: Run Cypress component tests
+        run: npm run test:component:run
+
       - name: Upload screenshots (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-      - name: Upload videos (on failure)
-        if: failure()
+          retention-days: 7
+
+      - name: Upload videos
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-videos
           path: cypress/videos
+          retention-days: 7

@@ -4,7 +4,7 @@ describe('Sign In Submission', () => {
     cy.get('input[type=email]').type('invalid@example.com');
     cy.get('input[type=password]').type('wrongpassword');
     cy.get('button[type=submit]').click();
-    cy.contains(/invalid|error|incorrect/i, { timeout: 5000 });
+  cy.contains('Invalid credentials', { timeout: 5000 });
   });
 
   // Add a valid credentials test if you have a test user

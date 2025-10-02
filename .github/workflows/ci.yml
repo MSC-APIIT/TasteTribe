@@ -31,3 +31,6 @@ jobs:
 
       - name: Run build
         run: npm run build
+
+      - name: Install Cypress
+        run: npm install cypress --save-dev
